@@ -4,7 +4,7 @@
 Proyecto : Dashboard UPC - el dash
 Autor    : Percy Salgado Espinoza (UPC - Campus Monterrico)
 Licencia : MIT License
-Versión  : v.0089 (Julio 2026)
+Versión  : v.0091 (Julio 2026)
 ==============================================================================
 
 Descripción:
@@ -15,7 +15,7 @@ Aulas y Laboratorios.
 Historial:
 - Idea y diseño conceptual iniciados en octubre de 2024.
 - Primeras líneas de código desarrolladas en enero de 2025.
-- Última versión estable: v.0089 (Julio de 2026).
+- Última versión estable: v.0091 (Julio de 2026).
 
 Propósito:
 Centralizar y optimizar la administración de horarios, recursos y actividades
@@ -1246,7 +1246,7 @@ window.DASHBOARD_FLOATING_VIDEO_URLS = {
         .immediate-choice-popover{position:fixed;right:22px;bottom:22px;z-index:2300;background:#fff;border:1px solid #d9cfdf;border-radius:14px;box-shadow:0 14px 34px rgba(34,19,43,.22);padding:12px;display:grid;gap:8px;min-width:230px}.immediate-choice-popover.hidden{display:none!important}.immediate-choice-title{font-weight:800;color:#3f2a49;font-size:.92rem}.immediate-choice-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 
         .dashboard-live-clock{cursor:move;touch-action:none;user-select:none}
-        .immediate-floating-action{position:fixed;z-index:2400;width:54px;height:54px;border-radius:999px;border:0;box-shadow:0 12px 28px rgba(15,23,42,.22);background:#21417f;color:#fff;display:none;align-items:center;justify-content:center;font-size:1.22rem;touch-action:none;user-select:none}.immediate-floating-action.secondary{background:#6a2948}.immediate-floating-action.tertiary{background:#157a53}.immediate-floating-action.quaternary{background:#0f766e}.immediate-floating-action.show{display:inline-flex}.immediate-floating-action:active{transform:scale(.96)}
+        .immediate-floating-action{position:fixed;z-index:2400;width:54px;height:54px;border-radius:999px;border:0;box-shadow:0 12px 28px rgba(15,23,42,.22);background:#21417f;color:#fff;display:none;align-items:center;justify-content:center;font-size:1.22rem;touch-action:none;user-select:none}.immediate-floating-action.secondary{background:#6a2948}.immediate-floating-action.tertiary{background:#157a53}.immediate-floating-action.quaternary{background:#0f766e}.immediate-floating-action.last-card{background:#f59e0b}.immediate-floating-action.show{display:inline-flex}.immediate-floating-action:active{transform:scale(.96)}
         .immediate-add-custom-card-wrap{display:flex;justify-content:center;padding:16px 14px 22px}.immediate-add-custom-card-btn{width:58px;height:58px;border-radius:999px;border:2px dashed #b9c4d6;background:#fff;color:#21417f;font-size:1.8rem;font-weight:800;box-shadow:0 6px 18px rgba(15,23,42,.08);line-height:1}.immediate-add-custom-card-btn:hover{background:#eef4ff;border-color:#21417f}
         .immediate-floating-config-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.immediate-floating-config-grid input[type="color"]{width:100%;height:42px;border:1px solid #d9cfdf;border-radius:10px;background:#fff;padding:3px}
 
@@ -1801,7 +1801,7 @@ window.DASHBOARD_FLOATING_VIDEO_URLS = {
     <!-- Footer -->
     <div class="footer">
         <div class="container">
-            <p class="mb-0">© 2026 Dashboard UPC <em>(El dash)</em> v.0089 - <a href="mailto:percy.salgado@upc.pe?subject=Sobre el dash">Feedback</a></p>
+            <p class="mb-0">© 2026 Dashboard UPC <em>(El dash)</em> v.0091 - <a href="mailto:percy.salgado@upc.pe?subject=Sobre el dash">Feedback</a></p>
         </div>
     </div>
 
@@ -2295,7 +2295,7 @@ function openScheduleForClassroom(itemOrClassroom, options = {}) {
   }
   try {
     currentWeekOffset = 0;
-    const classroomData = excelData.filter(item => item['COD AULA'] && item['COD AULA'].toString().trim().toLowerCase() === classroomCode.toLowerCase());
+    const classroomData = getDashboardRowsByAula(classroomCode);
     if (!classroomData.length) {
       alert(`No se encontraron datos para el aula ${classroomCode}`);
       return;
@@ -2303,7 +2303,7 @@ function openScheduleForClassroom(itemOrClassroom, options = {}) {
     const classroomInput = document.getElementById('classroomSearch');
     if (classroomInput) classroomInput.value = classroomCode.toUpperCase();
     displayClassroomSchedule(classroomCode.toUpperCase(), classroomData);
-    if (openInNewTab) expandSchedule();
+    if (openInNewTab) expandSchedule({ autoMobileFit: true });
   } catch (error) {
     console.error('Error al mostrar la programación del aula desde el reporte:', error);
     alert('Ocurrió un error al mostrar la programación del aula. Por favor, intente nuevamente.');
@@ -2797,15 +2797,14 @@ async function shareImmediateTaskFromModal(){
                 day: 'numeric'
             });
             
-            // Cargar datos guardados si existen
+            // Cargar datos guardados de forma perezosa: no se parsea el Excel previo al iniciar
   try {
-    const savedData = localStorage.getItem('lastExcelData');
-    if (savedData) {
-      lastUploadedData = JSON.parse(savedData);
-    }
-  } catch (e) {
-    console.warn('No se pudo leer lastExcelData desde localStorage:', e);
     lastUploadedData = null;
+    window.__dashboardLastExcelAvailable = !!(localStorage.getItem('lastExcelData') || localStorage.getItem('lastExcelStorage') === 'idb');
+  } catch (e) {
+    console.warn('No se pudo verificar la llave anterior:', e);
+    lastUploadedData = null;
+    window.__dashboardLastExcelAvailable = false;
   }
 // Configurar event listeners
             document.getElementById('uploadNewBtn').addEventListener('click', showUploadSection);
@@ -3145,6 +3144,33 @@ const _printLateBtn = document.getElementById('printLateReportBtn');
    });
  }
 
+
+ // Índices ligeros para que la data histórica no ralentice vistas/popups
+ let __dashboardDataCache={source:null,length:0,dateMap:new Map(),aulaMap:new Map(),pavilionAulas:new Map(),allAulas:[]};
+ function invalidateDashboardDataCache(){__dashboardDataCache={source:null,length:0,dateMap:new Map(),aulaMap:new Map(),pavilionAulas:new Map(),allAulas:[]};currentImmediateActionState=null}
+ function getDashboardItemDateKey(item){if(!item)return'';if(item.__dashDateKey!==undefined)return item.__dashDateKey;let key='';try{key=getImmediateSessionDateString(item)||''}catch(e){key=''}try{Object.defineProperty(item,'__dashDateKey',{value:key,writable:true,configurable:true,enumerable:false})}catch(e){item.__dashDateKey=key}return key}
+ function getDashboardItemStartMinutes(item){if(!item)return null;if(item.__dashStartMin!==undefined)return item.__dashStartMin;const m=convertTimeToMinutes(item['HORINI']);try{Object.defineProperty(item,'__dashStartMin',{value:m,writable:true,configurable:true,enumerable:false})}catch(e){item.__dashStartMin=m}return m}
+ function getDashboardItemEndMinutes(item){if(!item)return null;if(item.__dashEndMin!==undefined)return item.__dashEndMin;const m=convertTimeToMinutes(item['HORTER']);try{Object.defineProperty(item,'__dashEndMin',{value:m,writable:true,configurable:true,enumerable:false})}catch(e){item.__dashEndMin=m}return m}
+ function ensureDashboardDataCache(){
+   if(__dashboardDataCache.source===excelData&&__dashboardDataCache.length===(Array.isArray(excelData)?excelData.length:0))return __dashboardDataCache;
+   const dateMap=new Map(),aulaMap=new Map(),pavilionAulas=new Map(),allAulasSet=new Set();
+   (Array.isArray(excelData)?excelData:[]).forEach(item=>{
+     if(!item||!item['COD AULA'])return;
+     const aula=String(item['COD AULA']).trim(); if(!aula)return;
+     const pavilion=String(item['PABELLÓN']||'').trim();
+     const dateKey=getDashboardItemDateKey(item);
+     if(dateKey){ if(!dateMap.has(dateKey))dateMap.set(dateKey,[]); dateMap.get(dateKey).push(item); }
+     const aulaKey=aula.toLowerCase(); if(!aulaMap.has(aulaKey))aulaMap.set(aulaKey,[]); aulaMap.get(aulaKey).push(item);
+     allAulasSet.add(aula);
+     const pavKey=pavilion||'__sin_pabellon__'; if(!pavilionAulas.has(pavKey))pavilionAulas.set(pavKey,new Set()); pavilionAulas.get(pavKey).add(aula);
+   });
+   const pavObj=new Map(); pavilionAulas.forEach((set,key)=>pavObj.set(key,[...set].sort(compareClassroomCodes)));
+   __dashboardDataCache={source:excelData,length:Array.isArray(excelData)?excelData.length:0,dateMap,aulaMap,pavilionAulas:pavObj,allAulas:[...allAulasSet].sort(compareClassroomCodes)};
+   return __dashboardDataCache;
+ }
+ function optimizeDashboardDataForRendering(){try{ensureDashboardDataCache()}catch(e){console.warn('No se pudo optimizar la data guardada:',e)}}
+ function getDashboardRowsByAula(aula){const cache=ensureDashboardDataCache();return cache.aulaMap.get(String(aula||'').trim().toLowerCase())||[]}
+ function getDashboardRowsByDate(dateKey){const cache=ensureDashboardDataCache();return cache.dateMap.get(dateKey)||[]}
  // Normalizar valores de ExcelJS (reduce tamaño y evita objetos no serializables)
  function normalizeCellValue(v) {
    if (v === null || v === undefined) return '';
@@ -3162,6 +3188,8 @@ const _printLateBtn = document.getElementById('printLateReportBtn');
 
  async function persistLastUpload(excelDataToSave, buffer, file) {
    lastUploadedData = excelDataToSave;
+   invalidateDashboardDataCache();
+   optimizeDashboardDataForRendering();
    // 1) Intentar localStorage (rápido)
    try {
      localStorage.setItem('lastExcelData', JSON.stringify(excelDataToSave));
@@ -3214,6 +3242,8 @@ const _printLateBtn = document.getElementById('printLateReportBtn');
     // Si ya está en memoria
     if (lastUploadedData && Array.isArray(lastUploadedData) && lastUploadedData.length) {
       excelData = lastUploadedData;
+      invalidateDashboardDataCache();
+      optimizeDashboardDataForRendering();
       showFiltersView();
       return;
     }
@@ -3227,6 +3257,8 @@ const _printLateBtn = document.getElementById('printLateReportBtn');
     if (last.type === 'data') {
       excelData = last.data;
       lastUploadedData = last.data;
+      invalidateDashboardDataCache();
+      optimizeDashboardDataForRendering();
       showFiltersView();
       return;
     }
@@ -3398,6 +3430,8 @@ async function processExcelBuffer(buffer, fileName = 'archivo.xlsx', fileObj = n
     });
 
     excelData = previousExcelData.concat(primaryRows);
+    invalidateDashboardDataCache();
+    optimizeDashboardDataForRendering();
 
     // Hoja 2 (Reservas), si existe
     const worksheet2 = workbook.getWorksheet(2) || (Array.isArray(workbook.worksheets) && workbook.worksheets.length >= 2 ? workbook.worksheets[1] : null);
@@ -3966,7 +4000,7 @@ function showImmediatePavilionSelector() {
  currentImmediateActionState = null;
  renderImmediatePavilionButtons('immediatePavilionList');
  ensureImmediateFloatingButtons();
- setTimeout(()=>scrollToImmediateFirstCard(),60);
+ setTimeout(()=>{const firstTile=document.querySelector('#immediateActionsMenu .immediate-action-tile');immediateScrollToElementStable(firstTile||document.getElementById('immediateActionsMenu'),'start')},80);
 }
 
 const IMMEDIATE_ACTION_DEFINITIONS = [
@@ -4090,28 +4124,27 @@ function getImmediatePreviousOrCurrentEntry(entries, minuteMark) {
 }
 
 function getImmediateKnownAulas() {
- return [...new Set(excelData.filter(item => {
-   if (!item || !item['COD AULA']) return false;
-   if (currentImmediatePavilion && item['PABELLÓN'] !== currentImmediatePavilion) return false;
-   return true;
- }).map(item => item['COD AULA'].toString().trim()))].sort(compareClassroomCodes);
+ const cache=ensureDashboardDataCache();
+ const pav=String(currentImmediatePavilion||'').trim();
+ if(pav)return (cache.pavilionAulas.get(pav)||[]).slice();
+ return (cache.allAulas||[]).slice();
 }
 
 function getImmediateDayEntries(targetDate) {
  const dateString = formatDate(targetDate);
- const excelEntries = excelData.filter(item => {
+ const sourceRows = getDashboardRowsByDate(dateString);
+ const excelEntries = sourceRows.filter(item => {
    if (!item || !item['COD AULA']) return false;
    if (currentImmediatePavilion && item['PABELLÓN'] !== currentImmediatePavilion) return false;
-   if (getImmediateSessionDateString(item) !== dateString) return false;
-   const startMinutes = convertTimeToMinutes(item['HORINI']);
-   const endMinutes = convertTimeToMinutes(item['HORTER']);
+   const startMinutes = getDashboardItemStartMinutes(item);
+   const endMinutes = getDashboardItemEndMinutes(item);
    return startMinutes !== null && endMinutes !== null && endMinutes > startMinutes;
  }).map(item => ({
    item,
    aula: item['COD AULA'] ? item['COD AULA'].toString().trim() : '',
    pavilion: item['PABELLÓN'] || '',
-   startMinutes: convertTimeToMinutes(item['HORINI']),
-   endMinutes: convertTimeToMinutes(item['HORTER']),
+   startMinutes: getDashboardItemStartMinutes(item),
+   endMinutes: getDashboardItemEndMinutes(item),
    docente: formatImmediateDocente(item),
    course: item['DESCRIPCION CURSO NRC'] || (isReservationImmediate(item) ? 'Reserva' : 'Curso sin descripción'),
    nrc: item['NRC'] || '',
@@ -4224,7 +4257,7 @@ function openImmediateCustomIconModal(button){const entry=getImmediateEntryFromB
 function selectImmediateCustomIcon(icon){document.querySelectorAll('.immediate-custom-icon-choice').forEach(b=>b.classList.toggle('active',b.getAttribute('data-icon')===icon));const input=document.getElementById('immediateCustomIconValue');if(input)input.value=icon;const prev=document.getElementById('immediateCustomIconPreview');if(prev)prev.innerHTML=`<i class="bi ${escapeHtml(icon)}"></i>`}
 function saveImmediateCustomIconFromModal(){const entry=immediateUtilityModalState.entry;if(!entry)return;const title=(document.getElementById('immediateCustomIconTitle')?.value||'Icono personalizado').trim()||'Icono personalizado';const scope=document.getElementById('immediateCustomIconScope')?.value||'card';const icon=document.getElementById('immediateCustomIconValue')?.value||'bi-stars';const link=(document.getElementById('immediateCustomIconLink')?.value||'').trim();const text=(document.getElementById('immediateCustomIconText')?.value||'').trim();const actions=Array.from(document.querySelectorAll('.immediateCustomAction:checked')).map(x=>x.value);if(!link&&!text&&!actions.length){alert('Seleccione al menos una acción, link o texto.');return}const arr=getImmediateCustomIconStorage();arr.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),title,scope,icon,link,text,actions,actionKey:currentImmediateActionKey||'general',cardKey:getImmediateEntryIdentity(entry),createdAt:new Date().toISOString()});saveImmediateCustomIconStorage(arr);closeImmediateUtilityModal();currentImmediateActionState=buildImmediateActionState();if(currentImmediateActionKey)showImmediateActionResults(currentImmediateActionKey,{preserveScroll:true})}
 async function executeImmediateCustomIcon(button,id){const cfg=getImmediateCustomIconStorage().find(x=>x&&x.id===id);if(!cfg)return;const details=button.closest('details.immediate-card-collapsible');const idx=parseInt(details?.getAttribute('data-entry-index')||'',10);const entry=(currentImmediateActionState&&currentImmediateActionKey&&!isNaN(idx))?(currentImmediateActionState.actionData[currentImmediateActionKey]||[])[idx]:null;if(cfg.text)await copySimpleTextToClipboard(cfg.text);if(cfg.link)window.open(cfg.link,'_blank','noopener,noreferrer');for(const action of (cfg.actions||[])){try{await runImmediateCustomAction(action,button,entry)}catch(e){console.warn('Acción personalizada falló:',action,e)}}}
-async function runImmediateCustomAction(action,button,entry){switch(action){case'info':if(entry&&entry.item)showDetailModal(entry.item);break;case'shareCard':shareImmediateCard(button);break;case'reservations':window.open('https://upc-e2g-post.u-planner.com/booking/control-panel','_blank','noopener,noreferrer');break;case'reserve':openImmediateLastMinuteReservationModal(button);break;case'cleaning':openImmediateIncidentModal('cleaning',button);break;case'maintenance':openImmediateIncidentModal('maintenance',button);break;case'reminder':openImmediateReminderModal(button);break;case'mail':openImmediateMailModal(button);break;case'closeRoom':toggleImmediateAulaClosed(button);break;case'freeWeek':copyImmediateWeekFreeSlots(button);break;case'schedule':if(entry)openScheduleForClassroom(entry.aula,{openInNewTab:true});break;case'techReport':openImmediateTechnicalReportMenu(button);break;case'copyUser':{const opts=entry?getImmediateUserOptions(entry):[];if(opts.length)await copySimpleTextToClipboard(getImmediateCopyUserValue(opts[0]));break}case'reportClass':openImmediateReportClassModal(button);break;case'attention':confirmImmediateAttentionRecord(button);break;case'move':moveImmediateClass(button);break;case'dailyCleaning':toggleDailyCleaningPending(button);break;case'dailyOpen':toggleDailyOpenPending(button);break;case'aforo':openImmediateAforoModal(button);break;case'validate':openImmediateValidationModal(button);break}}
+async function runImmediateCustomAction(action,button,entry){switch(action){case'info':if(entry&&entry.item)showDetailModal(entry.item);break;case'shareCard':shareImmediateCard(button);break;case'reservations':window.open('https://upc-e2g-post.u-planner.com/booking/control-panel','_blank','noopener,noreferrer');break;case'reserve':openImmediateLastMinuteReservationModal(button);break;case'cleaning':openImmediateIncidentModal('cleaning',button);break;case'maintenance':openImmediateIncidentModal('maintenance',button);break;case'reminder':openImmediateReminderModal(button);break;case'mail':openImmediateMailModal(button);break;case'closeRoom':toggleImmediateAulaClosed(button);break;case'freeWeek':copyImmediateWeekFreeSlots(button);break;case'schedule':if(entry)openScheduleForClassroom(entry.aula,{openInNewTab:true,autoMobileFit:true});break;case'techReport':openImmediateTechnicalReportMenu(button);break;case'copyUser':{const opts=entry?getImmediateUserOptions(entry):[];if(opts.length)await copySimpleTextToClipboard(getImmediateCopyUserValue(opts[0]));break}case'reportClass':openImmediateReportClassModal(button);break;case'attention':confirmImmediateAttentionRecord(button);break;case'move':moveImmediateClass(button);break;case'dailyCleaning':toggleDailyCleaningPending(button);break;case'dailyOpen':toggleDailyOpenPending(button);break;case'aforo':openImmediateAforoModal(button);break;case'validate':openImmediateValidationModal(button);break}}
 
 function buildImmediateDetailActions(entry) {
  const actionDef=getImmediateActionDefinition(currentImmediateActionKey);const isClassActionCard=!!(actionDef&&actionDef.resultType==='class'&&entry&&entry.item);const isRoomActionCard=!!(actionDef&&actionDef.resultType==='room'&&entry&&entry.aula);const canRoomUtility=isClassActionCard||isRoomActionCard;const userOptions=isClassActionCard?getImmediateUserOptions(entry):[];const broomSvg=`<span class="immediate-broom-svg" aria-hidden="true" style="font-size:1.15rem;line-height:1;display:inline-flex;align-items:center;justify-content:center">🧹</span>`;
@@ -4311,7 +4344,7 @@ document.addEventListener('click', function(event) {
   const state = currentImmediateActionState;
   const entries = state && currentImmediateActionKey ? (state.actionData[currentImmediateActionKey] || []) : [];
   const entry = !isNaN(entryIndex) ? entries[entryIndex] : null;
-  if (entry) openScheduleForClassroom(entry.aula, { openInNewTab: true });
+  if (entry) openScheduleForClassroom(entry.aula, { openInNewTab: true, autoMobileFit: true });
   return;
  }
  if (copyBtn) {
@@ -4595,11 +4628,21 @@ function getImmediateFloatingConfig(){try{const c=JSON.parse(localStorage.getIte
 function saveImmediateFloatingConfig(c){try{localStorage.setItem(IMMEDIATE_FLOAT_BTN_CFG_KEY,JSON.stringify(c||{}))}catch(e){}}
 function applyImmediateFloatingConfig(){const cfg=getImmediateFloatingConfig();const colors=(cfg.colors||[]).filter(Boolean).slice(0,4);const size=Math.max(42,Math.min(84,parseInt(cfg.size||54,10)||54));document.querySelectorAll('.immediate-floating-action').forEach((btn,i)=>{btn.style.width=size+'px';btn.style.height=size+'px';btn.style.fontSize=Math.max(1, size/44).toFixed(2)+'rem';btn.style.background=colors[i%Math.max(colors.length,1)]||'#21417f'})}
 function createImmediateFloatingButton(id,cls,icon,title,clickHandler){let btn=document.getElementById(id);if(btn)return btn;btn=document.createElement('button');btn.id=id;btn.type='button';btn.className=`immediate-floating-action ${cls||''}`;btn.innerHTML=icon;btn.title=title+' | Mantenga presionado/mueva para reubicar. Doble toque o clic derecho: personalizar.';btn.setAttribute('aria-label',title);document.body.appendChild(btn);const pos=getImmediateFloatingPositions()[id]||{};btn.style.left=(pos.left||22)+'px';btn.style.top=(pos.top||Math.max(120,window.innerHeight-180))+'px';let startX=0,startY=0,startLeft=0,startTop=0,moved=false;btn.addEventListener('pointerdown',e=>{moved=false;startX=e.clientX;startY=e.clientY;startLeft=parseFloat(btn.style.left)||22;startTop=parseFloat(btn.style.top)||120;btn.setPointerCapture&&btn.setPointerCapture(e.pointerId)});btn.addEventListener('pointermove',e=>{if(e.buttons!==1)return;const dx=e.clientX-startX,dy=e.clientY-startY;if(Math.abs(dx)+Math.abs(dy)>5)moved=true;if(moved){const sz=parseFloat(btn.style.width)||54;btn.style.left=Math.max(6,Math.min(window.innerWidth-sz-8,startLeft+dx))+'px';btn.style.top=Math.max(70,Math.min(window.innerHeight-sz-8,startTop+dy))+'px'}});btn.addEventListener('pointerup',e=>{const data=getImmediateFloatingPositions();data[id]={left:parseFloat(btn.style.left)||22,top:parseFloat(btn.style.top)||120};saveImmediateFloatingPositions(data);if(!moved)clickHandler(e)});btn.addEventListener('dblclick',e=>{e.preventDefault();openImmediateFloatingConfigModal()});btn.addEventListener('contextmenu',e=>{e.preventDefault();openImmediateFloatingConfigModal()});return btn}
-function ensureImmediateFloatingButtons(){const first=createImmediateFloatingButton('immediateFloatFirstBtn','', '<i class="bi bi-arrow-up-circle"></i>','Ir a la primera tarjeta / primer apartado',()=>scrollToImmediateFirstCard());const last=createImmediateFloatingButton('immediateFloatLastBtn','quaternary','<i class="bi bi-arrow-down-circle"></i>','Ir a la última tarjeta / último apartado',()=>scrollToImmediateLastCard());const refresh=createImmediateFloatingButton('immediateFloatRefreshBtn','secondary','<i class="bi bi-arrow-left-right"></i>','Actualizar',()=>showImmediatePavilionSelector());const menu=createImmediateFloatingButton('immediateFloatMenuBtn','tertiary','<i class="bi bi-list-ul"></i>','Volver al menú principal de apartados',()=>showImmediateActionsHome());const section=document.getElementById('immediateActionsSection');const visible=section&&!section.classList.contains('hidden');[first,last,refresh,menu].forEach(b=>b&&b.classList.toggle('show',!!visible));applyImmediateFloatingConfig()}
+function ensureImmediateFloatingButtons(){const first=createImmediateFloatingButton('immediateFloatFirstBtn','', '<i class="bi bi-arrow-up-circle"></i>','Ir a la primera tarjeta / primer apartado',()=>scrollToImmediateFirstCard());const last=createImmediateFloatingButton('immediateFloatLastBtn','quaternary','<i class="bi bi-arrow-down-circle"></i>','Ir a la última tarjeta / último apartado',()=>scrollToImmediateLastCard());const back=createImmediateFloatingButton('immediateFloatLastSeenBtn','last-card','<i class="bi bi-arrow-return-left"></i>','Volver a la última tarjeta desplegada',()=>returnToImmediateLastOpenedCard());const refresh=createImmediateFloatingButton('immediateFloatRefreshBtn','secondary','<i class="bi bi-arrow-left-right"></i>','Actualizar',()=>showImmediatePavilionSelector());const menu=createImmediateFloatingButton('immediateFloatMenuBtn','tertiary','<i class="bi bi-list-ul"></i>','Volver al menú principal de apartados',()=>showImmediateActionsHome());const section=document.getElementById('immediateActionsSection');const visible=section&&!section.classList.contains('hidden');[first,last,back,refresh,menu].forEach(b=>b&&b.classList.toggle('show',!!visible));applyImmediateFloatingConfig()}
 function openImmediateFloatingConfigModal(){const cfg=getImmediateFloatingConfig();const colors=(cfg.colors||['#21417f','#6a2948','#157a53','#0f766e']).concat(['#21417f','#6a2948','#157a53','#0f766e']).slice(0,4);const body=`<div class="immediate-utility-help">Personalice hasta tres colores. Los botones flotantes alternarán estos colores. También puede ajustar el tamaño.</div><div class="immediate-floating-config-grid">${colors.map((c,i)=>`<div><label class="immediate-utility-label" for="immediateFloatColor${i}">Color ${i+1}</label><input id="immediateFloatColor${i}" type="color" value="${escapeHtml(c)}"></div>`).join('')}</div><div><label class="immediate-utility-label" for="immediateFloatSize">Tamaño: <span id="immediateFloatSizeLabel">${escapeHtml(String(cfg.size||54))}</span> px</label><input id="immediateFloatSize" type="range" min="42" max="84" value="${escapeHtml(String(cfg.size||54))}" class="immediate-utility-input" oninput="document.getElementById('immediateFloatSizeLabel').textContent=this.value"></div>`;const footer=`<button type="button" class="immediate-utility-btn" onclick="closeImmediateUtilityModal()">Cancelar</button><button type="button" class="immediate-utility-btn primary" onclick="saveImmediateFloatingConfigFromModal()">Guardar</button>`;openImmediateUtilityModal('Personalizar botones flotantes',body,footer)}
 function saveImmediateFloatingConfigFromModal(){const colors=[0,1,2,3].map(i=>document.getElementById('immediateFloatColor'+i)?.value||'').filter(Boolean).slice(0,4);const size=parseInt(document.getElementById('immediateFloatSize')?.value||'54',10)||54;saveImmediateFloatingConfig({colors,size});applyImmediateFloatingConfig();closeImmediateUtilityModal()}
-function scrollToImmediateFirstCard(){const first=document.querySelector('#immediateActionResultsContainer details.immediate-card-collapsible');if(first)first.scrollIntoView({behavior:'smooth',block:'start'});else{const tile=document.querySelector('#immediateActionsMenu .immediate-action-tile');(tile||document.getElementById('immediateActionsMenu'))?.scrollIntoView({behavior:'smooth',block:'start'})}}
-function scrollToImmediateLastCard(){const cards=document.querySelectorAll('#immediateActionResultsContainer details.immediate-card-collapsible');if(cards.length)cards[cards.length-1].scrollIntoView({behavior:'smooth',block:'end'});else{const tiles=document.querySelectorAll('#immediateActionsMenu .immediate-action-tile');(tiles.length?tiles[tiles.length-1]:document.getElementById('immediateActionsMenu'))?.scrollIntoView({behavior:'smooth',block:'end'})}}
+function immediateSmoothScrollToElement(el,block='start'){if(!el)return;const y=window.scrollY+el.getBoundingClientRect().top-(block==='end'?(window.innerHeight-el.offsetHeight-24):16);window.scrollTo({left:0,top:Math.max(0,y),behavior:'smooth'})}
+function isImmediateResultsListVisible(){const resultsWrap=document.getElementById('immediateActionResultsSection');return !!(resultsWrap&&!resultsWrap.classList.contains('hidden')&&resultsWrap.getClientRects().length)}
+function isImmediateMenuVisible(){const contentView=document.getElementById('immediateActionsContentView');const menu=document.getElementById('immediateActionsMenu');return !!(contentView&&menu&&!contentView.classList.contains('hidden')&&menu.getClientRects().length)}
+function immediateScrollToElementStable(el,block='start'){if(!el)return;requestAnimationFrame(()=>{try{el.scrollIntoView({behavior:'smooth',block,inline:'nearest'})}catch(e){const rect=el.getBoundingClientRect();const y=window.scrollY+rect.top-(block==='end'?(window.innerHeight-rect.height-24):16);window.scrollTo({left:0,top:Math.max(0,y),behavior:'smooth'})}})}
+function getImmediateVisibleCards(){if(!isImmediateResultsListVisible())return[];return Array.from(document.querySelectorAll('#immediateActionResultsContainer details.immediate-card-collapsible')).filter(el=>el.getClientRects().length)}
+function getImmediateVisibleTiles(){if(!isImmediateMenuVisible())return[];return Array.from(document.querySelectorAll('#immediateActionsMenu .immediate-action-tile')).filter(el=>el.getClientRects().length)}
+function scrollToImmediateFirstCard(){const cards=getImmediateVisibleCards();if(cards.length){immediateScrollToElementStable(cards[0],'start');return}const tiles=getImmediateVisibleTiles();if(tiles.length){immediateScrollToElementStable(tiles[0],'start');return}immediateScrollToElementStable(document.getElementById('immediateActionsMenu')||document.getElementById('immediateActionsSection'),'start')}
+function scrollToImmediateLastCard(){const cards=getImmediateVisibleCards();if(cards.length){immediateScrollToElementStable(cards[cards.length-1],'end');return}const tiles=getImmediateVisibleTiles();if(tiles.length){immediateScrollToElementStable(tiles[tiles.length-1],'end');return}immediateScrollToElementStable(document.getElementById('immediateActionsMenu')||document.getElementById('immediateActionsSection'),'end')}
+let __immediateLastOpenedCard=null;
+function rememberImmediateOpenedCard(details){if(!details||!details.matches('details.immediate-card-collapsible'))return;if(!details.open)return;__immediateLastOpenedCard={actionKey:currentImmediateActionKey||'',idx:details.getAttribute('data-entry-index')||'',aula:(details.querySelector('.immediate-aula-pill')?.textContent||'').trim(),savedAt:Date.now()}}
+function returnToImmediateLastOpenedCard(){const info=__immediateLastOpenedCard;if(!info){alert('Aún no hay una última tarjeta desplegada.');return}if(info.actionKey&&info.actionKey!==currentImmediateActionKey){showImmediateActionResults(info.actionKey,{preserveScroll:false})}setTimeout(()=>{const safeIdx=(window.CSS&&CSS.escape)?CSS.escape(info.idx):String(info.idx||'').replace(/\"/g,'');let d=document.querySelector(`#immediateActionResultsContainer details.immediate-card-collapsible[data-entry-index="${safeIdx}"]`);if(!d&&info.aula){d=Array.from(document.querySelectorAll('#immediateActionResultsContainer details.immediate-card-collapsible')).find(x=>(x.querySelector('.immediate-aula-pill')?.textContent||'').trim()===info.aula)}if(!d){alert('No se encontró la última tarjeta vista en la vista actual.');return}d.open=true;immediateSmoothScrollToElement(d,'start')},160)}
+document.addEventListener('toggle',function(e){const d=e.target;if(d&&d.matches&&d.matches('details.immediate-card-collapsible')&&d.open)rememberImmediateOpenedCard(d)},true);
 const IMMEDIATE_CUSTOM_CARDS_KEY='dashboardImmediateCustomCards';
 function getImmediateCustomCardsStorage(){return storageArr(IMMEDIATE_CUSTOM_CARDS_KEY)}
 function saveImmediateCustomCardsStorage(arr){saveArr(IMMEDIATE_CUSTOM_CARDS_KEY,arr)}
@@ -5676,10 +5719,22 @@ function showLateClasses() {
                         .schedule-cell-extra { font-size: 0.78rem; color: #5b6779; }
                         .time-note { font-size: 0.75rem; color: #6b7280; display: block; }
                         @media (max-width: 900px) {
-                            body { padding: 12px; }
-                            .toolbar, .content { padding: 14px; }
+                            body { padding: 0; overflow-x: hidden; }
+                            .sheet { width: 100vw; max-width: 100vw; min-height: 100vh; border-radius: 0; border-left: 0; border-right: 0; }
+                            .toolbar, .content { padding: 10px; }
+                            .title h1 { font-size: 1.05rem; line-height: 1.15; }
+                            .title p, .helper { font-size: 0.82rem; }
                             .toolbar-actions { width: 100%; }
-                            .toolbar-actions .btn { flex: 1 1 auto; }
+                            .toolbar-actions .btn { flex: 1 1 auto; padding: 9px 10px; font-size: 0.84rem; }
+                            .legend-wrap { margin-bottom: 8px; }
+                            .table-wrap { width: 100%; overflow: visible; border-radius: 8px; }
+                            .schedule-table { width: 100%; min-width: 0; table-layout: fixed; font-size: clamp(0.46rem, 1.85vw, 0.76rem); }
+                            .schedule-table th, .schedule-table td { padding: 4px 2px; word-break: break-word; overflow-wrap: anywhere; }
+                            .time-cell { width: 9%; min-width: 0; white-space: normal; font-size: 0.68em; }
+                            .schedule-cell-content { min-height: 42px; gap: 1px; line-height: 1.05; }
+                            .schedule-cell-tag { font-size: 0.55em; padding: 1px 3px; }
+                            .schedule-cell-time, .schedule-cell-extra { font-size: 0.64em; }
+                            .free-label { padding: 2px 3px; font-size: 0.66em; }
                         }
                         @media print {
                             body { background: white; padding: 0; }
@@ -5716,6 +5771,20 @@ function showLateClasses() {
                         </div>
                     </div>
                     <script>
+                        function autoFitWeeklyScheduleMobile(){
+                            try{
+                                const isMobile=window.matchMedia('(max-width: 900px)').matches || Math.min(window.innerWidth, window.innerHeight) < 760;
+                                const table=document.querySelector('.schedule-table');
+                                const wrap=document.querySelector('.table-wrap');
+                                if(!isMobile||!table||!wrap)return;
+                                document.documentElement.style.width='100%';
+                                document.body.style.width='100%';
+                                table.style.minWidth='0';
+                                table.style.width='100%';
+                                wrap.scrollLeft=0;
+                                setTimeout(()=>window.scrollTo({left:0,top:0,behavior:'auto'}),30);
+                            }catch(e){console.warn(e)}
+                        }
                         window.addEventListener('DOMContentLoaded', function () {
                             const btn = document.getElementById('popupGeneratePdfBtn');
                             if (btn && window.opener && typeof window.opener.generateWeeklySchedulePdf === 'function') {
@@ -5723,6 +5792,8 @@ function showLateClasses() {
                                     window.opener.generateWeeklySchedulePdf();
                                 });
                             }
+                            autoFitWeeklyScheduleMobile();
+                            window.addEventListener('resize', autoFitWeeklyScheduleMobile);
                         });
                     <\/script>
                 </body>
@@ -5730,7 +5801,7 @@ function showLateClasses() {
             `;
         }
         
-        function expandSchedule() {
+        function expandSchedule(options = {}) {
             const classroom = document.getElementById('scheduleClassroomName').textContent;
             if (!classroom) {
                 alert('Primero genere la programación del aula.');
@@ -5744,6 +5815,7 @@ function showLateClasses() {
             newWindow.document.open();
             newWindow.document.write(buildWeeklyScheduleWindowHtml());
             newWindow.document.close();
+            if (options && options.autoMobileFit) { try { newWindow.focus(); } catch(e){} }
         }
         
         function generateWeeklySchedulePdf() {
