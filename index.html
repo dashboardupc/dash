@@ -4,7 +4,7 @@
 Proyecto : Dashboard UPC - el dash
 Autor    : Percy Salgado Espinoza (UPC - Campus Monterrico)
 Licencia : MIT License
-Versión  : v.0092 (Julio 2026)
+Versión  : v.0093 (Julio 2026)
 ==============================================================================
 
 Descripción:
@@ -15,7 +15,7 @@ Aulas y Laboratorios.
 Historial:
 - Idea y diseño conceptual iniciados en octubre de 2024.
 - Primeras líneas de código desarrolladas en enero de 2025.
-- Última versión estable: v.0092 (Julio de 2026).
+- Última versión estable: v.0093 (Julio de 2026).
 
 Propósito:
 Centralizar y optimizar la administración de horarios, recursos y actividades
@@ -1504,7 +1504,7 @@ window.DASHBOARD_FLOATING_VIDEO_URLS = {
                     <h4 class="mb-1">Estoy aquí!</h4>
                     <p>Seleccione primero el pabellón asignado para mostrar acciones inmediatas.</p>
                 </div>
-                <span class="schedule-badge"><i class="bi bi-lightning-charge-fill"></i> Respuesta rápida por pabellón</span>
+                <button type="button" id="immediatePavilionVisibilityBtn" class="schedule-badge" onclick="openImmediatePavilionVisibilityMenu()" title="Seleccionar pabellones visibles" aria-label="Seleccionar pabellones visibles" style="cursor:pointer"><i class="bi bi-lightning-charge-fill"></i> Respuesta rápida por pabellón</button>
             </div>
             <div class="immediate-pavilion-panel">
                 <h3 class="mb-3">Pabellones disponibles</h3>
@@ -1801,7 +1801,7 @@ window.DASHBOARD_FLOATING_VIDEO_URLS = {
     <!-- Footer -->
     <div class="footer">
         <div class="container">
-            <p class="mb-0">© 2026 Dashboard UPC <em>(El dash)</em> v.0092 - <a href="mailto:percy.salgado@upc.pe?subject=Sobre el dash">Feedback</a></p>
+            <p class="mb-0">© 2026 Dashboard UPC <em>(El dash)</em> v.0093 - <a href="mailto:percy.salgado@upc.pe?subject=Sobre el dash">Feedback</a></p>
         </div>
     </div>
 
@@ -2417,12 +2417,15 @@ function getImmediateSelectedDateKey(entry){
 }
 function getImmediateClosedKey(entry){return entry&&entry.aula?`${String(entry.aula).trim().toLowerCase()}|${getImmediateSelectedDateKey(entry)}`:''}
 function getImmediateClosedStorage(){return storageObj(IMMEDIATE_CLOSED_STORAGE_KEY)}function saveImmediateClosedStorage(d){saveObj(IMMEDIATE_CLOSED_STORAGE_KEY,d)}function getImmediateClosedInfo(entry){const k=getImmediateClosedKey(entry);return k?(getImmediateClosedStorage()[k]||null):null}function isImmediateAulaClosed(entry){return !!getImmediateClosedInfo(entry)}function markImmediateAulaClosed(entry){const k=getImmediateClosedKey(entry);if(!k)return;const s=getImmediateClosedStorage();s[k]={aula:entry.aula||'',dateKey:getImmediateSelectedDateKey(entry),updatedAt:new Date().toISOString()};saveImmediateClosedStorage(s)}function unmarkImmediateAulaClosed(entry){const k=getImmediateClosedKey(entry);if(!k)return;const s=getImmediateClosedStorage();delete s[k];saveImmediateClosedStorage(s)}function toggleImmediateAulaClosed(button){
+ const x=window.scrollX,y=window.scrollY;
+ recordImmediateScrollAnchorFromElement(button);
  const entry=getImmediateEntryFromButton(button);
  if(!entry||!entry.aula){alert('No se pudo identificar el aula.');return}
  if(isImmediateAulaClosed(entry)){if(!confirm(`El aula ${entry.aula||''} ya está marcada como cerrada. ¿Desea reabrirla?`))return;unmarkImmediateAulaClosed(entry)}
  else{if(!confirm(`¿Confirma que el aula ${entry.aula||''} quedó cerrada hasta el final del día?`))return;markImmediateAulaClosed(entry)}
  currentImmediateActionState=buildImmediateActionState();
- if(currentImmediateActionKey==='allRooms') showImmediateActionResults('allRooms'); else showImmediateActionResults(currentImmediateActionKey)
+ if(currentImmediateActionKey==='allRooms') showImmediateActionResults('allRooms',{preserveScroll:true}); else showImmediateActionResults(currentImmediateActionKey,{preserveScroll:true});
+ restoreImmediateExactScroll(x,y)
 }
 function ensureImmediateUtilityModalShell(){let b=document.getElementById('immediateUtilityBackdrop');if(b)return b;b=document.createElement('div');b.id='immediateUtilityBackdrop';b.className='immediate-utility-backdrop hidden';b.innerHTML=`<div class="immediate-utility-modal" role="dialog" aria-modal="true" aria-labelledby="immediateUtilityTitle"><div class="immediate-utility-header"><div id="immediateUtilityTitle" class="immediate-utility-title"></div><button type="button" class="immediate-utility-close" aria-label="Cerrar" onclick="closeImmediateUtilityModal()">&times;</button></div><div id="immediateUtilityBody" class="immediate-utility-body"></div><div id="immediateUtilityFooter" class="immediate-utility-footer"></div></div>`;b.addEventListener('click',e=>{if(e.target===b)closeImmediateUtilityModal()});document.body.appendChild(b);return b}
 function openImmediateUtilityModal(title,body,footer=''){const b=ensureImmediateUtilityModalShell();document.getElementById('immediateUtilityTitle').textContent=title||'';document.getElementById('immediateUtilityBody').innerHTML=body||'';document.getElementById('immediateUtilityFooter').innerHTML=footer||'';b.classList.remove('hidden')}
@@ -3952,10 +3955,19 @@ function buildRoomTechBadge(aulaCode) {
  return `<span class="room-tech-badge ${type}"><i class="bi ${current.icon}"></i> ${current.label}</span>`;
 }
 
+const IMMEDIATE_PAVILION_VISIBILITY_KEY='dashboardImmediatePavilionVisibility';
+function getImmediateHiddenPavilions(){try{const a=JSON.parse(localStorage.getItem(IMMEDIATE_PAVILION_VISIBILITY_KEY)||'[]');return new Set(Array.isArray(a)?a:[])}catch(e){return new Set()}}
+function saveImmediateHiddenPavilions(set){try{localStorage.setItem(IMMEDIATE_PAVILION_VISIBILITY_KEY,JSON.stringify(Array.from(set||[])))}catch(e){console.warn(e)}}
+function getVisibleImmediatePavilions(){const hidden=getImmediateHiddenPavilions();return getImmediatePavilions().filter(p=>!hidden.has(p))}
+function closeImmediatePavilionVisibilityMenu(){document.getElementById('immediatePavilionVisibilityMenu')?.remove()}
+function refreshImmediatePavilionVisibilityViews(){renderImmediatePavilionButtons('immediatePavilionList');renderImmediatePavilionButtons('immediatePavilionFilterList')}
+function setImmediatePavilionVisibility(pavilion,visible){const hidden=getImmediateHiddenPavilions();if(visible)hidden.delete(pavilion);else hidden.add(pavilion);saveImmediateHiddenPavilions(hidden);if(!visible&&currentImmediatePavilion===pavilion){currentImmediatePavilion='';currentImmediateActionKey='';currentImmediateActionState=null}refreshImmediatePavilionVisibilityViews();openImmediatePavilionVisibilityMenu()}
+function setAllImmediatePavilionsVisibility(visible){const hidden=new Set();if(!visible)getImmediatePavilions().forEach(p=>hidden.add(p));saveImmediateHiddenPavilions(hidden);if(!visible){currentImmediatePavilion='';currentImmediateActionKey='';currentImmediateActionState=null}refreshImmediatePavilionVisibilityViews();openImmediatePavilionVisibilityMenu()}
+function openImmediatePavilionVisibilityMenu(){closeImmediatePavilionVisibilityMenu();const trigger=document.getElementById('immediatePavilionVisibilityBtn');const rect=trigger?trigger.getBoundingClientRect():{left:14,top:80,bottom:120};const hidden=getImmediateHiddenPavilions();const pavilions=getImmediatePavilions();const menu=document.createElement('div');menu.id='immediatePavilionVisibilityMenu';menu.className='dashboard-video-status-menu';menu.innerHTML=`<div class="dashboard-video-status-title">Pabellones visibles</div><div class="dashboard-video-status-help">Seleccione los pabellones que desea mostrar y utilizar en dash.</div><div class="dashboard-video-status-list">${pavilions.map(p=>{const isHidden=hidden.has(p);return `<div class="dashboard-video-status-item"><div><div class="dashboard-video-status-name">${escapeHtml(p)}</div><span class="dashboard-video-status-badge ${isHidden?'off':'on'}">${isHidden?'Oculto':'Visible'}</span></div><div class="dashboard-video-status-actions">${isHidden?`<button type="button" class="primary" data-pavilion-action="show" data-pavilion="${escapeHtml(p)}">Mostrar</button>`:`<button type="button" class="danger" data-pavilion-action="hide" data-pavilion="${escapeHtml(p)}">Ocultar</button>`}</div></div>`}).join('')}</div><div class="dashboard-video-status-footer"><button type="button" data-pavilion-action="showAll">Ver todos</button><button type="button" data-pavilion-action="hideAll">Ocultar todos</button><button type="button" data-pavilion-action="close">Cancelar</button></div>`;document.body.appendChild(menu);const left=Math.min(window.innerWidth-menu.offsetWidth-8,Math.max(8,rect.left));let top=rect.bottom+10;if(top+menu.offsetHeight>window.innerHeight-8)top=Math.max(8,rect.top-menu.offsetHeight-10);menu.style.left=left+'px';menu.style.top=top+'px';menu.addEventListener('click',e=>{const b=e.target.closest('button[data-pavilion-action]');if(!b)return;const action=b.getAttribute('data-pavilion-action');const pavilion=b.getAttribute('data-pavilion')||'';if(action==='show')setImmediatePavilionVisibility(pavilion,true);else if(action==='hide')setImmediatePavilionVisibility(pavilion,false);else if(action==='showAll')setAllImmediatePavilionsVisibility(true);else if(action==='hideAll')setAllImmediatePavilionsVisibility(false);else closeImmediatePavilionVisibilityMenu()})}
 function renderImmediatePavilionButtons(containerId) {
  const container = document.getElementById(containerId);
  if (!container) return;
- const pavilions = getImmediatePavilions();
+ const pavilions = getVisibleImmediatePavilions();
  container.innerHTML = '';
  pavilions.forEach(pavilion => {
   const btn = document.createElement('button');
