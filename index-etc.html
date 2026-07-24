@@ -4531,6 +4531,7 @@ function buildImmediateActionState() {
 
 const IMMEDIATE_ACTION_ORDER_STORAGE_KEY='dashboardImmediateActionOrder';
 let immediateDraggedActionKey='';
+let immediateDraggedActionElement=null;
 
 function getImmediateActionOrder(){
  try{
@@ -4539,64 +4540,33 @@ function getImmediateActionOrder(){
   const order=Array.isArray(stored)?stored.filter(key=>available.includes(key)):[];
   available.forEach(key=>{if(!order.includes(key))order.push(key)});
   return order;
- }catch(e){
-  return IMMEDIATE_ACTION_DEFINITIONS.map(def=>def.key);
- }
+ }catch(e){return IMMEDIATE_ACTION_DEFINITIONS.map(def=>def.key)}
 }
-
-function saveImmediateActionOrder(order){
- try{localStorage.setItem(IMMEDIATE_ACTION_ORDER_STORAGE_KEY,JSON.stringify(order||[]))}catch(e){console.warn(e)}
-}
-
-function getOrderedImmediateActionDefinitions(){
- const definitions=new Map(IMMEDIATE_ACTION_DEFINITIONS.map(def=>[def.key,def]));
- return getImmediateActionOrder().map(key=>definitions.get(key)).filter(Boolean);
-}
-
-function moveImmediateActionBefore(sourceKey,targetKey){
- if(!sourceKey||!targetKey||sourceKey===targetKey)return;
- const order=getImmediateActionOrder();
- const sourceIndex=order.indexOf(sourceKey);
- const targetIndex=order.indexOf(targetKey);
- if(sourceIndex<0||targetIndex<0)return;
- order.splice(sourceIndex,1);
- order.splice(targetIndex,0,sourceKey);
- saveImmediateActionOrder(order);
-}
-
-function clearImmediateActionDragStyles(){
- document.querySelectorAll('#immediateActionsMenu .immediate-action-tile').forEach(tile=>tile.classList.remove('immediate-dragging','immediate-drag-over'));
-}
-
+function saveImmediateActionOrder(order){try{localStorage.setItem(IMMEDIATE_ACTION_ORDER_STORAGE_KEY,JSON.stringify(order||[]))}catch(e){console.warn(e)}}
+function getOrderedImmediateActionDefinitions(){const definitions=new Map(IMMEDIATE_ACTION_DEFINITIONS.map(def=>[def.key,def]));return getImmediateActionOrder().map(key=>definitions.get(key)).filter(Boolean)}
+function saveImmediateActionOrderFromDom(){const order=Array.from(document.querySelectorAll('#immediateActionsMenu .immediate-action-tile')).map(tile=>tile.dataset.actionKey).filter(Boolean);saveImmediateActionOrder(order)}
+function clearImmediateActionDragStyles(){document.querySelectorAll('#immediateActionsMenu .immediate-action-tile').forEach(tile=>tile.classList.remove('immediate-dragging','immediate-drag-over'))}
 function bindImmediateActionTileDrag(button,key){
- button.draggable=true;
- button.dataset.actionKey=key;
- button.title=(button.title?button.title+' | ':'')+'Arrastre para cambiar el orden';
- button.addEventListener('dragstart',event=>{
-  immediateDraggedActionKey=key;
-  button.classList.add('immediate-dragging');
-  if(event.dataTransfer){event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',key)}
- });
- button.addEventListener('dragover',event=>{
-  event.preventDefault();
-  if(immediateDraggedActionKey&&immediateDraggedActionKey!==key){
-   button.classList.add('immediate-drag-over');
-   if(event.dataTransfer)event.dataTransfer.dropEffect='move';
-  }
- });
+ button.draggable=true;button.dataset.actionKey=key;button.title=(button.title?button.title+' | ':'')+'Arrastre para cambiar el orden';
+ button.addEventListener('dragstart',event=>{immediateDraggedActionKey=key;immediateDraggedActionElement=button;button.classList.add('immediate-dragging');if(event.dataTransfer){event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',key)}});
+ button.addEventListener('dragover',event=>{event.preventDefault();if(immediateDraggedActionKey&&immediateDraggedActionKey!==key){button.classList.add('immediate-drag-over');if(event.dataTransfer)event.dataTransfer.dropEffect='move'}});
  button.addEventListener('dragleave',()=>button.classList.remove('immediate-drag-over'));
  button.addEventListener('drop',event=>{
   event.preventDefault();
-  const sourceKey=immediateDraggedActionKey||(event.dataTransfer?event.dataTransfer.getData('text/plain'):'');
-  moveImmediateActionBefore(sourceKey,key);
-  immediateDraggedActionKey='';
-  clearImmediateActionDragStyles();
-  showImmediateActionsHome();
+  const source=immediateDraggedActionElement||document.querySelector(`#immediateActionsMenu .immediate-action-tile[data-action-key="${CSS.escape(immediateDraggedActionKey)}"]`);
+  const target=button;
+  if(!source||source===target)return;
+  const x=window.scrollX,y=window.scrollY;
+  const menu=target.parentElement;
+  const sourceRect=source.getBoundingClientRect(),targetRect=target.getBoundingClientRect();
+  const placeAfter=(sourceRect.top<targetRect.top)||(Math.abs(sourceRect.top-targetRect.top)<8&&sourceRect.left<targetRect.left);
+  if(placeAfter)menu.insertBefore(source,target.nextSibling);else menu.insertBefore(source,target);
+  saveImmediateActionOrderFromDom();
+  immediateDraggedActionKey='';immediateDraggedActionElement=null;clearImmediateActionDragStyles();
+  window.scrollTo({left:x,top:y,behavior:'auto'});
+  requestAnimationFrame(()=>window.scrollTo({left:x,top:y,behavior:'auto'}));
  });
- button.addEventListener('dragend',()=>{
-  immediateDraggedActionKey='';
-  clearImmediateActionDragStyles();
- });
+ button.addEventListener('dragend',()=>{immediateDraggedActionKey='';immediateDraggedActionElement=null;clearImmediateActionDragStyles()});
 }
 
 function showImmediateActionsHome() {
