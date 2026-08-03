@@ -4,7 +4,7 @@
 Proyecto : Dashboard UPC - el dash
 Autor    : Percy Salgado (UPC - Campus Monterrico)
 Licencia : MIT License
-Versión  : v.00114 (Agosto 2026)
+Versión  : v.00115 (Agosto 2026)
 ==============================================================================
 
 Descripción:
@@ -14,7 +14,7 @@ realizadas en Ambientes Académicos de la UPC
 Historial:
 - Idea y diseño conceptual iniciados entre el 2023 y 2024.
 - Primeras versiones desarrolladas en fines de 2024.
-- Última versión estable: v.00114 (Agosto de 2026).
+- Última versión estable: v.00115 (Agosto de 2026).
 
 Propósito:
 Centralizar y optimizar la administración de horarios, recursos y actividades
@@ -1587,8 +1587,8 @@ window.DASHBOARD_FLOATING_VIDEO_URLS = {
         <div class="hidden" id="globalSearchView">
             <div class="dashboard-view-toolbar" aria-label="Acciones de búsqueda global">
                 <button class="btn btn-outline-primary" type="button" title="Filtros de búsqueda" aria-label="Filtros de búsqueda" onclick="showFiltersView()"><i class="bi bi-funnel"></i></button>
-                <button class="btn btn-outline-info" type="button" title="Mostrar pabellones" aria-label="Mostrar pabellones" onclick="showFiltersView();setTimeout(showPavilions,0)"><i class="bi bi-signpost-2"></i></button>
-                <button class="btn btn-outline-warning" type="button" title="Clases para el cierre" aria-label="Clases para el cierre" onclick="showFiltersView();setTimeout(showLateClasses,0)"><i class="bi bi-clock"></i></button>
+                <button class="btn btn-outline-info" type="button" title="Mostrar pabellones" aria-label="Mostrar pabellones" onclick="showPavilionsEntry()"><i class="bi bi-signpost-2"></i></button>
+                <button class="btn btn-outline-warning" type="button" title="Clases para el cierre" aria-label="Clases para el cierre" onclick="showLateClassesEntry()"><i class="bi bi-clock"></i></button>
                 <button class="btn btn-outline-secondary" type="button" title="Búsqueda global" aria-label="Búsqueda global" onclick="showGlobalSearch()"><i class="bi bi-globe-americas"></i></button>
                 <button class="btn btn-outline-info" type="button" title="Mostrar ambientes disponibles" aria-label="Mostrar ambientes disponibles" onclick="showAvailableSpacesEntry()"><i class="bi bi-door-open"></i></button>
                 <button class="btn dash-green" type="button" title="Dash" aria-label="Dash" onclick="showFiltersView();setTimeout(showImmediateActionsEntry,0)"><i class="bi bi-speedometer"></i></button>
@@ -1799,7 +1799,7 @@ window.DASHBOARD_FLOATING_VIDEO_URLS = {
     <!-- Footer -->
     <div class="footer">
         <div class="container">
-            <p class="mb-0">© 2026 Dashboard UPC <em>(El dash)</em> v.00114 - <a href="mailto:percy.salgado@upc.pe?subject=Sobre el dash">Feedback</a></p>
+            <p class="mb-0">© 2026 Dashboard UPC <em>(El dash)</em> v.00115 - <a href="mailto:percy.salgado@upc.pe?subject=Sobre el dash">Feedback</a></p>
         </div>
     </div>
 
@@ -2922,7 +2922,7 @@ async function shareImmediateTaskFromModal(){
             
             document.getElementById('backToDashboard').addEventListener('click', showDashboard);
             document.getElementById('filtersViewBtn')?.addEventListener('click', showFiltersView);
-            document.getElementById('showPavilionsBtn').addEventListener('click', showPavilions);
+            document.getElementById('showPavilionsBtn').addEventListener('click', showPavilionsEntry);
             document.getElementById('globalSearchBtn').addEventListener('click', showGlobalSearch);
             document.getElementById('availableSpacesBtn').addEventListener('click', showAvailableSpacesEntry);
             document.getElementById('executeGlobalSearch').addEventListener('click', executeGlobalSearch);
@@ -2969,7 +2969,7 @@ const _printLateBtn = document.getElementById('printLateReportBtn');
             document.getElementById('generateScheduleBtn').addEventListener('click', generateClassroomSchedule);
             document.getElementById('prevWeekBtn').addEventListener('click', showPrevWeek);
             document.getElementById('nextWeekBtn').addEventListener('click', showNextWeek);
-            document.getElementById('showLateClassesBtn').addEventListener('click', showLateClasses);
+            document.getElementById('showLateClassesBtn').addEventListener('click', showLateClassesEntry);
             document.getElementById('showImmediateActionsBtn').addEventListener('click', showImmediateActionsEntry);
             document.getElementById('backToImmediateMenuBtn').addEventListener('click', showImmediateActionsHome);
             document.getElementById('backToImmediatePavilionBtn').addEventListener('click', showImmediatePavilionSelector);
@@ -3179,7 +3179,7 @@ const _printLateBtn = document.getElementById('printLateReportBtn');
           if(Array.isArray(value))return value.filter(v=>{const d=backupObjectDate(v,parentDate);return !d||(d>=from&&d<=to)}).map(v=>filterBackupRange(v,from,to,backupObjectDate(v,parentDate)));
           if(value&&typeof value==='object'){const own=backupObjectDate(value,parentDate),out={};for(const [k,v] of Object.entries(value)){const keyDate=backupDate(k),d=keyDate||backupObjectDate(v,own);if(d&&!(d>=from&&d<=to))continue;out[k]=filterBackupRange(v,from,to,d||own)}return out}return value
         }
-        function collectBackup(scope,user,range){const storage={};backupKeys(scope).forEach(k=>{const raw=localStorage.getItem(k);if(raw!==null){let v=backupParse(raw);if(range&&scope==='work')v=filterBackupRange(v,range.from,range.to);storage[k]=v}});return{format:DASHBOARD_BACKUP_FORMAT,version:2,dashboardVersion:'v.00114',scope,exportedAt:new Date().toISOString(),exportedBy:user,dateRange:range||null,storage}}
+        function collectBackup(scope,user,range){const storage={};backupKeys(scope).forEach(k=>{const raw=localStorage.getItem(k);if(raw!==null){let v=backupParse(raw);if(range&&scope==='work')v=filterBackupRange(v,range.from,range.to);storage[k]=v}});return{format:DASHBOARD_BACKUP_FORMAT,version:2,dashboardVersion:'v.00115',scope,exportedAt:new Date().toISOString(),exportedBy:user,dateRange:range||null,storage}}
         function downloadBackup(data){const safe=String(data.exportedBy||'usuario').replace(/[^A-Za-z0-9_-]+/g,'-'),stamp=new Date().toISOString().replace(/[:.]/g,'-'),b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=`Dashboard-UPC-${data.scope}-${safe}-${stamp}.psalgado`;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
         function openDashboardWorkRangeChoice(){openImmediateUtilityModal('Compartir avance',`<div class="immediate-utility-help">¿Desea compartir avances de varios días? Si elige No, se compartirán solamente los avances del día de hoy.</div><div class="backup-range-choice"><button onclick="openDashboardBackupExport('work','today')"><i class="bi bi-calendar-day"></i><br>No, solo hoy</button><button onclick="openDashboardBackupDateRange()"><i class="bi bi-calendar-range"></i><br>Sí, varios días</button></div>`,`<button class="immediate-utility-btn" onclick="openDashboardBackupsMenu()">Volver</button>`)}
         function openDashboardBackupDateRange(){const t=new Date().toISOString().slice(0,10);openImmediateUtilityModal('Periodo del avance',`<div class="immediate-utility-row"><div><label class="immediate-utility-label">Fecha inicial</label><input id="backupDateFrom" type="date" class="immediate-utility-input" value="${t}"></div><div><label class="immediate-utility-label">Fecha final</label><input id="backupDateTo" type="date" class="immediate-utility-input" value="${t}"></div></div>`,`<button class="immediate-utility-btn" onclick="openDashboardWorkRangeChoice()">Volver</button><button class="immediate-utility-btn primary" onclick="continueDashboardRangeExport()">Continuar</button>`)}
@@ -5166,6 +5166,10 @@ function generateImmediateActionsPdf() {
   const safePavilion = (currentImmediatePavilion || 'pabellon').replace(/[^a-zA-Z0-9_-]/g, '_');
   doc.save(`estoy_aqui_${safePavilion}_${fileDate}.pdf`);
  }
+        function scrollDashboardSectionIntoView(sectionId){setTimeout(()=>{const section=document.getElementById(sectionId);if(!section||section.classList.contains('hidden'))return;try{section.scrollIntoView({behavior:'smooth',block:'start',inline:'nearest'})}catch(e){const rect=section.getBoundingClientRect();window.scrollTo({left:0,top:Math.max(0,window.scrollY+rect.top-16),behavior:'smooth'})}},60)}
+        function showPavilionsEntry(){if(currentView!=='filters')showFiltersView();showPavilions();scrollDashboardSectionIntoView('pavilionSection')}
+        function showLateClassesEntry(){if(currentView!=='filters')showFiltersView();showLateClasses();scrollDashboardSectionIntoView('lateClassesSection')}
+
         function showPavilions() {
             hideImmediateActionsPanel();
             const render=(campus)=>{const pavilions=[...new Set(rowsForCampus(campus).map(item=>item['PABELLÓN']).filter(Boolean))].sort();displayPavilions(pavilions);currentPavilion=null;document.getElementById('timeSlotSection').classList.add('hidden')};
