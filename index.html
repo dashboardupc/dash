@@ -2,9 +2,9 @@
 <!--
 ==============================================================================
 Proyecto : Dashboard UPC - el dash
-Autor    : Percy Salgado Espinoza (UPC - Campus Monterrico)
+Autor    : Percy Salgado (UPC - Campus Monterrico)
 Licencia : MIT License
-Versión  : v.00108 (Julio 2026)
+Versión  : v.00114 (Agosto 2026)
 ==============================================================================
 
 Descripción:
@@ -12,9 +12,9 @@ Dashboard desarrollado para la gestión y seguimiento de las actividades
 realizadas en Ambientes Académicos de la UPC
 
 Historial:
-- Idea y diseño conceptual iniciados en octubre de 2024.
-- Primeras líneas de código desarrolladas en enero de 2025.
-- Última versión estable: v.00108 (Julio de 2026).
+- Idea y diseño conceptual iniciados entre el 2023 y 2024.
+- Primeras versiones desarrolladas en fines de 2024.
+- Última versión estable: v.00114 (Agosto de 2026).
 
 Propósito:
 Centralizar y optimizar la administración de horarios, recursos y actividades
@@ -25,8 +25,9 @@ Copyright (c) Percy Salgado Espinoza percy.salgado@upc.pe
 ==============================================================================
 -->
 
-<!-- Configuracion de videos flotantes - editar solo estas URLs -->
+<!-- Configuracion de videos flotantes -->
 <script>
+window.DASHBOARD_MANUAL_URL = 'https://dashboardupc.github.io/dash/';
 window.DASHBOARD_FLOATING_VIDEO_URLS = {
   // Video general usado como respaldo si alguna seccion no tiene URL definida.
   default: 'videos/general.mp4',
@@ -1280,6 +1281,11 @@ window.DASHBOARD_FLOATING_VIDEO_URLS = {
 
 
         #resultsSection.border, #resultsSection.border-2, #resultsSection.border-primary { border: 0 !important; }
+
+.immediate-action-tile{position:relative}.immediate-action-hide-btn{position:absolute;right:8px;top:8px;width:25px;height:25px;border:1px solid #d5deeb;border-radius:8px;background:#fff;color:#64748b;z-index:2}.immediate-hidden-blind{grid-column:1/-1;border:1px solid #dce7fb;border-radius:12px;background:#f8fbff;overflow:hidden}.immediate-hidden-blind>button{width:100%;border:0;background:#eef4ff;color:#21417f;padding:7px 12px;font-weight:800}.immediate-hidden-items{display:none;padding:10px;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px}.immediate-hidden-blind.open .immediate-hidden-items{display:grid}.immediate-hidden-mini{border:1px solid #dce7fb;border-radius:10px;background:#fff;padding:9px;text-align:left;color:#24324a;font-weight:700}.immediate-icon-curtain{order:999}.immediate-icon-hidden{display:none!important}.immediate-longpress-menu{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap}.immediate-longpress-menu button small{display:none!important}.immediate-longpress-menu button{width:52px;height:52px;border-radius:14px;border:1px solid #d9e4f2;background:#fff;color:#21417f;font-size:1.25rem}.immediate-longpress-menu button.danger{color:#dc3545}.lamp-report-output{width:100%;min-height:220px;font-family:monospace;white-space:pre}
+
+.dashboard-view-toolbar{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-bottom:1.5rem}.dashboard-view-toolbar .btn{width:42px;height:42px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:10px}.dashboard-view-toolbar .btn i{font-size:1.08rem}.dashboard-view-toolbar .dash-green{color:#157a53;border-color:#8fd6b5;background:#effcf5}.dashboard-view-toolbar .dash-green:hover{color:#fff;background:#157a53;border-color:#157a53}.global-campus-wrap{margin-bottom:18px}.global-campus-wrap .form-select{max-width:100%}
+.dashboard-view-toolbar .dashboard-backup-icon{color:#0d6efd!important;background:#fff!important;border:1px solid #0d6efd!important;box-shadow:none}.dashboard-view-toolbar .dashboard-backup-icon:hover{color:#fff!important;background:#0d6efd!important;border-color:#0d6efd!important}.dashboard-view-toolbar .dashboard-backup-icon .bi{color:#0d6efd!important;font-size:1.18rem;font-weight:400}.dashboard-view-toolbar .dashboard-backup-icon:hover .bi{color:#fff!important}.backup-menu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:12px}.backup-menu-card{min-height:108px;border:1px solid #d9e4f2;border-radius:14px;background:#fff;color:#21417f;padding:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;text-align:center;font-weight:700}.backup-menu-card:hover{background:#eef4ff;border-color:#21417f}.backup-menu-card .bi{font-size:1.5rem}.backup-menu-card small{font-weight:500;color:#64748b;line-height:1.2}.backup-range-choice{display:grid;grid-template-columns:1fr 1fr;gap:12px}.backup-range-choice button{border:1px solid #d9e4f2;border-radius:14px;background:#fff;color:#21417f;padding:18px 10px;font-weight:800}.backup-range-choice button:hover{background:#eef4ff}
 </style>
 </head>
 <body>
@@ -1355,20 +1361,22 @@ window.DASHBOARD_FLOATING_VIDEO_URLS = {
 
         <!-- Vista de Filtros y Resultados -->
         <div class="hidden" id="filtersView">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>Filtros de búsqueda</h2>
-                <div class="d-inline-flex align-items-center gap-2">
-                    <button class="btn btn-outline-primary" id="academicSoftwareUploadBtn" type="button" title="Subir Listado de Software Académico" aria-label="Subir Listado de Software Académico" onclick="openAcademicSoftwareUploadModal()">
-                        <i class="bi bi-rocket-takeoff"></i>
-                    </button>
-                    <button class="btn btn-outline-secondary" id="backToDashboard" type="button" title="Volver" aria-label="Volver">
-                        <i class="bi bi-arrow-left"></i>
-                    </button>
-                </div>
+            <div class="dashboard-view-toolbar" aria-label="Acciones principales">
+                <button class="btn btn-outline-primary" id="filtersViewBtn" type="button" title="Filtros de búsqueda" aria-label="Filtros de búsqueda"><i class="bi bi-funnel"></i></button>
+                <button class="btn btn-outline-info" id="showPavilionsBtn" type="button" title="Mostrar pabellones" aria-label="Mostrar pabellones"><i class="bi bi-signpost-2"></i></button>
+                <button class="btn btn-outline-warning" id="showLateClassesBtn" type="button" title="Clases para el cierre" aria-label="Clases para el cierre"><i class="bi bi-clock"></i></button>
+                <button class="btn btn-outline-secondary" id="globalSearchBtn" type="button" title="Búsqueda global" aria-label="Búsqueda global"><i class="bi bi-globe-americas"></i></button>
+                <button class="btn btn-outline-info" id="availableSpacesBtn" type="button" title="Mostrar ambientes disponibles" aria-label="Mostrar ambientes disponibles"><i class="bi bi-door-open"></i></button>
+                <button class="btn dash-green" id="showImmediateActionsBtn" type="button" title="Dash" aria-label="Dash"><i class="bi bi-speedometer"></i></button>
+                <button class="btn btn-outline-primary" id="mailNotesReportBtn" type="button" title="Mi supercorreo" aria-label="Mi supercorreo"><i class="bi bi-envelope-fill"></i></button>
+                <button class="btn btn-outline-primary" id="academicSoftwareUploadBtn" type="button" title="Subir Listado de Software Académico" aria-label="Subir Listado de Software Académico" onclick="openAcademicSoftwareUploadModal()"><i class="bi bi-rocket-takeoff"></i></button>
+                <button class="btn btn-outline-primary" id="dashManualBtn" type="button" title="Manual del Dash" aria-label="Manual del Dash" onclick="openDashManual()"><i class="bi bi-book"></i></button>
+                <button class="btn dashboard-backup-icon" id="dashboardBackupsBtn" type="button" title="Backups" aria-label="Backups" onclick="openDashboardBackupsMenu()"><i class="bi bi-cloud-arrow-up-fill"></i></button>
+                <button class="btn btn-outline-secondary clear-search-btn" id="clearFiltersBtn" type="button" title="Limpiar búsqueda" aria-label="Limpiar búsqueda"><i class="bi bi-x-circle"></i></button>
+                <button class="btn btn-outline-secondary" id="backToDashboard" type="button" title="Volver" aria-label="Volver"><i class="bi bi-arrow-left"></i></button>
             </div>
-            
             <div class="alert alert-success">
-                <i class="bi bi-calendar-check"></i> Mostrando horarios para la fecha actual: <span id="currentDate"></span>. Olvídate de tu mal talante y enróllate con la de alante!
+                <i class="bi bi-calendar-check"></i> Mostrando horarios para la fecha actual: <span id="currentDate"></span>. <span id="dashboardWikiquoteText">Olvídate de tu mal talante y enróllate con la de alante -- Hombres G.</span>
             </div>
             
             <div class="filter-section">
@@ -1394,57 +1402,12 @@ window.DASHBOARD_FLOATING_VIDEO_URLS = {
                     </div>
                 </div>
                 
-                <div class="row mt-3">
-                    <div class="col-md-6 mb-2">
-                        <button class="btn btn-info w-100" id="showPavilionsBtn">
-                            <i class="bi bi-signpost-2"></i> Mostrar pabellones
-                        </button>
-                    </div>
-                    <div class="col-md-6 mb-2">
-                        <button class="btn btn-secondary w-100" id="globalSearchBtn">
-                            <i class="bi bi-search"></i> Búsqueda global
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Nuevo botón para Clases Tarde/Noche -->
-                <div class="row mt-3">
-                    <div class="col-md-12">
-                        <button class="btn btn-warning w-100" id="showLateClassesBtn">
-                            <i class="bi bi-clock"></i> Clases para el cierre
-                        </button>
-                    </div>
-                </div>
-
-                
-<div class="row mt-3">
-    <div class="col-md-12">
-        <button class="btn btn-success w-100" id="showImmediateActionsBtn">
-            <i class="bi bi-person-fill-check"></i> dash!
-        </button>
-    </div>
-</div>
-<div class="row mt-3">
-    <div class="col-md-12">
-        <button class="btn btn-outline-primary w-100" id="mailNotesReportBtn">
-            <i class="bi bi-envelope-paper"></i> Mail
-        </button>
-    </div>
-</div>
-
-<!-- Botón para Limpiar Búsqueda (NUEVO) -->
-                <div class="row mt-3">
-                    <div class="col-md-12">
-                        <button class="btn btn-secondary clear-search-btn w-100" id="clearFiltersBtn">
-                            <i class="bi bi-x-circle"></i> Limpiar búsqueda
-                        </button>
-                    </div>
-                </div>
             </div>
             
             <!-- Selector de Pabellón -->
             <div class="filter-section hidden" id="pavilionSection">
                 <h4>Pabellones disponibles</h4>
+                <div class="mb-3"><label class="form-label" for="pavilionCampusSelect">Campus</label><select class="form-select" id="pavilionCampusSelect" aria-label="Campus para pabellones disponibles"></select></div>
                 <div class="d-flex flex-wrap" id="pavilionList">
                     <!-- Los pabellones se cargarán aquí -->
                 </div>
@@ -1496,6 +1459,8 @@ window.DASHBOARD_FLOATING_VIDEO_URLS = {
                 </div>
 
   <div class="mb-3">
+    <label class="form-label" for="lateCampusSelect">Campus:</label>
+    <select class="form-select mb-3" id="lateCampusSelect" aria-label="Campus para cierre de clases"></select>
     <label class="form-label">Pabellón:</label>
     <div class="d-flex flex-wrap" id="latePavilionList">
       <!-- Botones de pabellón para cierre -->
@@ -1620,18 +1585,28 @@ window.DASHBOARD_FLOATING_VIDEO_URLS = {
 
         <!-- Vista de Búsqueda Global -->
         <div class="hidden" id="globalSearchView">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>Búsqueda global</h2>
-                <button class="btn btn-outline-secondary" id="backToFilters">
-                    <i class="bi bi-arrow-left"></i> Volver
-                </button>
+            <div class="dashboard-view-toolbar" aria-label="Acciones de búsqueda global">
+                <button class="btn btn-outline-primary" type="button" title="Filtros de búsqueda" aria-label="Filtros de búsqueda" onclick="showFiltersView()"><i class="bi bi-funnel"></i></button>
+                <button class="btn btn-outline-info" type="button" title="Mostrar pabellones" aria-label="Mostrar pabellones" onclick="showFiltersView();setTimeout(showPavilions,0)"><i class="bi bi-signpost-2"></i></button>
+                <button class="btn btn-outline-warning" type="button" title="Clases para el cierre" aria-label="Clases para el cierre" onclick="showFiltersView();setTimeout(showLateClasses,0)"><i class="bi bi-clock"></i></button>
+                <button class="btn btn-outline-secondary" type="button" title="Búsqueda global" aria-label="Búsqueda global" onclick="showGlobalSearch()"><i class="bi bi-globe-americas"></i></button>
+                <button class="btn btn-outline-info" type="button" title="Mostrar ambientes disponibles" aria-label="Mostrar ambientes disponibles" onclick="showAvailableSpacesEntry()"><i class="bi bi-door-open"></i></button>
+                <button class="btn dash-green" type="button" title="Dash" aria-label="Dash" onclick="showFiltersView();setTimeout(showImmediateActionsEntry,0)"><i class="bi bi-speedometer"></i></button>
+                <button class="btn btn-outline-primary" type="button" title="Mi supercorreo" aria-label="Mi supercorreo" onclick="openImmediateMailMainMenu()"><i class="bi bi-envelope-fill"></i></button>
+                <button class="btn btn-outline-primary" type="button" title="Subir Listado de Software Académico" aria-label="Subir Listado de Software Académico" onclick="openAcademicSoftwareUploadModal()"><i class="bi bi-rocket-takeoff"></i></button>
+                <button class="btn btn-outline-primary" type="button" title="Manual del Dash" aria-label="Manual del Dash" onclick="openDashManual()"><i class="bi bi-book"></i></button>
+                <button class="btn dashboard-backup-icon" type="button" title="Backups" aria-label="Backups" onclick="openDashboardBackupsMenu()"><i class="bi bi-cloud-arrow-up-fill"></i></button>
+                <button class="btn btn-outline-secondary clear-search-btn" type="button" title="Limpiar búsqueda" aria-label="Limpiar búsqueda" onclick="clearSearchFields()"><i class="bi bi-x-circle"></i></button>
             </div>
-            
             <div class="alert alert-warning">
                 <i class="bi bi-exclamation-triangle"></i> La búsqueda global muestra resultados de todas las fechas, no solo del día actual.
             </div>
             
             <div class="filter-section">
+                <div class="global-campus-wrap">
+                    <label class="form-label" for="globalCampusSelect">Campus</label>
+                    <select class="form-select" id="globalCampusSelect" aria-label="Campus para búsqueda global"></select>
+                </div>
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Búsqueda por usuario</label>
@@ -1666,31 +1641,26 @@ window.DASHBOARD_FLOATING_VIDEO_URLS = {
                     </div>
                 </div>
                 
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label">Software asignado</label>
+                        <input type="text" class="form-control" id="softwareGlobalSearch" placeholder="Nombre o versión del software">
+                    </div>
+                </div>
                 <div class="row mt-3">
-                    <div class="col-md-6 mb-2">
+                    <div class="col-md-12 mb-2">
                         <button class="btn btn-primary w-100" id="executeGlobalSearch">
                             <i class="bi bi-search"></i> Ejecutar búsqueda
                         </button>
                     </div>
-                    <div class="col-md-6 mb-2">
-                        <button class="btn btn-secondary clear-search-btn w-100" id="clearSearchBtn">
-                            <i class="bi bi-x-circle"></i> Limpiar búsqueda
-                        </button>
-                    </div>
                 </div>
                 
-                <div class="row mt-3">
-                    <div class="col-md-12">
-                        <button class="btn btn-info w-100" id="availableSpacesBtn">
-                            <i class="bi bi-door-open"></i> Mostrar ambientes disponibles
-                        </button>
-                    </div>
-                </div>
             </div>
             
             <!-- Nueva sección para mostrar pabellones en búsqueda global -->
             <div class="filter-section hidden" id="pavilionSectionGlobal">
                 <h4>Pabellones disponibles</h4>
+                <div class="mb-3"><label class="form-label" for="availableCampusSelect">Campus</label><select class="form-select" id="availableCampusSelect" aria-label="Campus para ambientes disponibles"></select></div>
                 <p class="text-muted">Seleccione un pabellón para ver los ambientes disponibles:</p>
                 <div class="d-flex flex-wrap" id="pavilionListGlobal">
                     <!-- Los pabellones se cargarán aquí -->
@@ -1829,7 +1799,7 @@ window.DASHBOARD_FLOATING_VIDEO_URLS = {
     <!-- Footer -->
     <div class="footer">
         <div class="container">
-            <p class="mb-0">© 2026 Dashboard UPC <em>(El dash)</em> v.00108 - <a href="mailto:percy.salgado@upc.pe?subject=Sobre el dash">Feedback</a></p>
+            <p class="mb-0">© 2026 Dashboard UPC <em>(El dash)</em> v.00114 - <a href="mailto:percy.salgado@upc.pe?subject=Sobre el dash">Feedback</a></p>
         </div>
     </div>
 
@@ -1914,7 +1884,22 @@ window.DASHBOARD_FLOATING_VIDEO_URLS = {
           for(let i=tokens.length-1;i>=0;i--){const token=tokens[i];if(Object.prototype.hasOwnProperty.call(roman,token))return String(roman[token]);if(/^\d{1,2}$/.test(token)){const level=parseInt(token,10);if(level>=1&&level<=20)return String(level)}}
           return'';
         }
-        function academicCourseFieldsMatch(a,b,threshold=.80){const levelA=getAcademicCourseLevel(a),levelB=getAcademicCourseLevel(b);if(levelA||levelB){if(!levelA||!levelB||levelA!==levelB)return false}return academicTextSimilarity(a,b)>=threshold}
+        function academicCourseFieldsMatch(a,b,threshold=.80){
+          const levelA=getAcademicCourseLevel(a),levelB=getAcademicCourseLevel(b);
+          if(levelA||levelB){if(!levelA||!levelB||levelA!==levelB)return false}
+          const x=normalizeAcademicComparable(a),y=normalizeAcademicComparable(b);
+          if(!x||!y)return false;
+          if(x===y)return true;
+          const xt=x.split(' ').filter(Boolean),yt=y.split(' ').filter(Boolean);
+          // Los nombres con diferente cantidad estructural de palabras se consideran cursos distintos.
+          // Esto impide unir, por ejemplo, PROYECTO AUDIOVISUAL con PROYECTOS AUDIOVISUALES E INTERACTIVOS.
+          if(xt.length!==yt.length)return false;
+          const xa=new Set(xt),ya=new Set(yt),common=[...xa].filter(t=>ya.has(t)).length;
+          const tokenCoverage=common/Math.max(xa.size,ya.size,1);
+          // Las variaciones manuales menores siguen permitidas, pero exigen cobertura léxica casi total
+          // y una similitud global alta. No se usa inclusión parcial de una cadena dentro de otra.
+          return tokenCoverage>=.80&&academicTextSimilarity(a,b)>=Math.max(.90,threshold);
+        }
         function getAcademicPeriodYear(value){const m=String(value??'').match(/\d{4}/);return m?m[0]:String(value??'').trim().slice(0,4)}
         const ACADEMIC_SOFTWARE_ASSIGNMENTS_KEY='dashboardAcademicSoftwareAssignments';
         function getAcademicSoftwareAssignments(){try{return JSON.parse(localStorage.getItem(ACADEMIC_SOFTWARE_ASSIGNMENTS_KEY)||'{}')||{}}catch(e){return{}}}
@@ -2460,7 +2445,7 @@ function saveAllRoomsReportToNotes(title,text){const oneLine=normalizeReportText
 async function shareTextOrShow(title,text){try{if(navigator.share){await navigator.share({title,text});return}}catch(e){if(e&&e.name==='AbortError')return}await copySimpleTextToClipboard(text);alert('Reporte copiado. Péguelo en WhatsApp para compartir.')}
 function openAllRoomsReportHeaderModal(){const pavilion=escapeHtml(currentImmediatePavilion||'Pabellón actual');const current=escapeHtml(getAllRoomsReportHeader());const body=`<div><label class="immediate-utility-label">Pabellón</label><input class="immediate-utility-input" value="${pavilion}" readonly></div><div><label class="immediate-utility-label" for="allRoomsReportHeaderText">Encabezado del reporte</label><textarea id="allRoomsReportHeaderText" class="immediate-utility-textarea" placeholder="Escriba el encabezado que irá al inicio de los reportes...">${current}</textarea><div class="immediate-utility-help">Este encabezado se guarda de forma independiente para cada pabellón y se añadirá al inicio de los reportes de limpieza y cierre.</div></div>`;const footer=`<button type="button" class="immediate-utility-btn" onclick="openAllRoomsSharePopup()">Volver</button><button type="button" class="immediate-utility-btn primary" onclick="saveAllRoomsReportHeaderFromModal()">Guardar</button>`;openImmediateUtilityModal('Encabezado - Reportes de Todas las aulas',body,footer)}
 function saveAllRoomsReportHeaderFromModal(){const value=document.getElementById('allRoomsReportHeaderText')?.value||'';setAllRoomsReportHeader(value);alert('Encabezado guardado para este pabellón.');openAllRoomsSharePopup()}
-function openAllRoomsSharePopup(){const headerStatus=getAllRoomsReportHeader()?'Encabezado configurado':'Sin encabezado configurado';const footer=`<button type="button" class="immediate-utility-btn secondary" onclick="openAllRoomsReportHeaderModal()"><i class="bi bi-card-text"></i> Encabezado</button><button type="button" class="immediate-utility-btn" onclick="openAllRoomsReportPreviewModal('cleaning')">Pendientes para limpieza</button><button type="button" class="immediate-utility-btn primary" onclick="openAllRoomsReportPreviewModal('open')">Pendientes para el cierre</button><button type="button" class="immediate-utility-btn" onclick="openAllRoomsClosedReportModal()"><i class="bi bi-key"></i> Cerrados</button><button type="button" class="immediate-utility-btn" onclick="openAllRoomsValidationsReportModal()"><i class="bi bi-camera-video"></i> Validaciones</button><button type="button" class="immediate-utility-btn secondary" onclick="closeImmediateUtilityModal()">Cerrar</button>`;openImmediateUtilityModal('Compartir reportes - Todas las aulas',`<div class="immediate-utility-help">Seleccione el reporte operativo que desea revisar. Antes de compartir podrá ver el recuento de ambientes, editar o agregar texto.<br><strong>${escapeHtml(currentImmediatePavilion||'Pabellón')}:</strong> ${escapeHtml(headerStatus)}</div>`,footer)}
+function openAllRoomsSharePopup(){const headerStatus=getAllRoomsReportHeader()?'Encabezado configurado':'Sin encabezado configurado';const footer=`<button type="button" class="immediate-utility-btn secondary" onclick="openAllRoomsReportHeaderModal()"><i class="bi bi-card-text"></i> Encabezado</button><button type="button" class="immediate-utility-btn" onclick="openAllRoomsReportPreviewModal('cleaning')">Pendientes para limpieza</button><button type="button" class="immediate-utility-btn primary" onclick="openAllRoomsReportPreviewModal('open')">Pendientes para el cierre</button><button type="button" class="immediate-utility-btn" onclick="openAllRoomsClosedReportModal()"><i class="bi bi-key"></i> Cerrados</button><button type="button" class="immediate-utility-btn" onclick="openAllRoomsValidationsReportModal()"><i class="bi bi-camera-video"></i> Validaciones</button><button type="button" class="immediate-utility-btn" onclick="openImmediateLampReport()"><i class="bi bi-projector"></i> Horas de lámparas</button><button type="button" class="immediate-utility-btn secondary" onclick="closeImmediateUtilityModal()">Cerrar</button>`;openImmediateUtilityModal('Compartir reportes - Todas las aulas',`<div class="immediate-utility-help">Seleccione el reporte operativo que desea revisar. Antes de compartir podrá ver el recuento de ambientes, editar o agregar texto.<br><strong>${escapeHtml(currentImmediatePavilion||'Pabellón')}:</strong> ${escapeHtml(headerStatus)}</div>`,footer)}
 function getAllRoomsClosedOpenData(){const rooms=(currentImmediateActionState?.actionData?.allRooms||[]).filter(r=>r&&r.aula&&!r.isMiscNotes).slice().sort((a,b)=>compareClassroomCodes(a.aula,b.aula));return{closed:rooms.filter(isImmediateAulaClosed).map(r=>r.aula),open:rooms.filter(r=>!isImmediateAulaClosed(r)).map(r=>r.aula)}}
 function buildAllRoomsClosedShareText(){const d=getAllRoomsClosedOpenData(),n=Math.max(d.closed.length,d.open.length,1),rows=[];for(let i=0;i<n;i++)rows.push(`${d.closed[i]||''} | ${d.open[i]||''}`);return `Estado de ambientes - ${currentImmediatePavilion||'Pabellón'}\nCerrados | Abiertos\n${rows.join('\n')}`}
 function openAllRoomsClosedReportModal(){const d=getAllRoomsClosedOpenData();openImmediateUtilityModal('Cerrados y abiertos',`<div class="immediate-closed-report-grid"><div class="immediate-closed-report-col"><h6>Cerrados (${d.closed.length})</h6>${d.closed.map(a=>`<div>${escapeHtml(a)}</div>`).join('')||'<div>Sin ambientes</div>'}</div><div class="immediate-closed-report-col"><h6>Abiertos (${d.open.length})</h6>${d.open.map(a=>`<div>${escapeHtml(a)}</div>`).join('')||'<div>Sin ambientes</div>'}</div></div>`,`<button class="immediate-utility-btn" onclick="openAllRoomsSharePopup()">Volver</button><button class="immediate-utility-btn primary" onclick="shareTextOrShow('Cerrados y abiertos',buildAllRoomsClosedShareText())"><i class="bi bi-whatsapp"></i> Compartir</button>`)}
@@ -2764,7 +2749,7 @@ function immediateReminderDateInputValue(date){const d=new Date(date);return `${
 function immediateReminderEscape(value){return String(value||'').replace(/\\/g,'\\\\').replace(/\r?\n/g,'\\n').replace(/,/g,'\\,').replace(/;/g,'\\;')}
 function immediateReminderDateTime(date,minutes){const d=new Date(date);d.setHours(Math.floor(minutes/60),minutes%60,0,0);return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}T${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}00`}
 function getImmediateReminderMatches(startDate,endDate,startMin,endMin){const known=getImmediateKnownAulas(),results=[];for(const date=new Date(startDate);date<=endDate;date.setDate(date.getDate()+1)){const eventDate=new Date(date),dayEntries=getImmediateDayEntries(eventDate),roomMap=buildImmediateRoomMap(dayEntries),grouped={};Object.keys(roomMap).forEach(aula=>{grouped[aula]=sortImmediateEntriesByStartAndAula(groupImmediateClassEntries(roomMap[aula]||[]))});for(let classStart=Math.ceil(startMin/60)*60;classStart<=endMin;classStart+=60){const alertMin=classStart-20;if(alertMin<startMin||alertMin>endMin)continue;const aulas=[];known.forEach(aula=>{const schedule=grouped[aula]||[],starts=schedule.some(e=>e&&e.startMinutes===classStart),freeBefore=!schedule.some(e=>e&&e.startMinutes<alertMin&&e.endMinutes>alertMin);if(starts&&freeBefore)aulas.push(aula)});if(aulas.length)results.push({date:eventDate,classStart,alertMin,aulas:[...new Set(aulas)].sort((a,b)=>String(a).localeCompare(String(b),'es',{numeric:true}))})}}return results}
-function buildImmediateReminderIcs(matches){const now=new Date(),stamp=`${now.getUTCFullYear()}${String(now.getUTCMonth()+1).padStart(2,'0')}${String(now.getUTCDate()).padStart(2,'0')}T${String(now.getUTCHours()).padStart(2,'0')}${String(now.getUTCMinutes()).padStart(2,'0')}${String(now.getUTCSeconds()).padStart(2,'0')}Z`,lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Dashboard UPC//Recordatorios de aulas//ES','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:Próximas clases - Dashboard UPC'];matches.forEach((m,i)=>{const classHour=formatMinutesToTime(m.classStart),alertTime=immediateReminderDateTime(m.date,m.alertMin),endTime=immediateReminderDateTime(m.date,m.alertMin+5),title=`Próximas clases a las ${classHour}`,detail=`${m.aulas.join(', ')}: los ambientes están cerrados e inician clases a las ${classHour} hrs.`;lines.push('BEGIN:VEVENT',`UID:dashboard-upc-${formatDate(m.date)}-${m.classStart}-${i}@local`,`DTSTAMP:${stamp}`,`DTSTART;TZID=America/Lima:${alertTime}`,`DTEND;TZID=America/Lima:${endTime}`,`SUMMARY:${immediateReminderEscape(title)}`,`DESCRIPTION:${immediateReminderEscape(detail)}`,`LOCATION:${immediateReminderEscape(currentImmediatePavilion||'')}`,'STATUS:CONFIRMED','TRANSP:TRANSPARENT','X-MICROSOFT-CDO-BUSYSTATUS:FREE','X-MICROSOFT-CDO-INTENDEDSTATUS:FREE','BEGIN:VALARM','TRIGGER:PT0M','ACTION:DISPLAY',`DESCRIPTION:${immediateReminderEscape(detail)}`,'END:VALARM','END:VEVENT')});lines.push('END:VCALENDAR');return lines.join('\r\n')+'\r\n'}
+function buildImmediateReminderIcs(matches){const now=new Date(),stamp=`${now.getUTCFullYear()}${String(now.getUTCMonth()+1).padStart(2,'0')}${String(now.getUTCDate()).padStart(2,'0')}T${String(now.getUTCHours()).padStart(2,'0')}${String(now.getUTCMinutes()).padStart(2,'0')}${String(now.getUTCSeconds()).padStart(2,'0')}Z`,lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Dashboard UPC//Recordatorios de aulas//ES','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:Próximas clases - Dashboard UPC'];matches.forEach((m,i)=>{const classHour=formatMinutesToTime(m.classStart),alertTime=immediateReminderDateTime(m.date,m.alertMin),endTime=immediateReminderDateTime(m.date,m.alertMin+5),title=`Próximas clases a las ${classHour}`,detail=`${m.aulas.join(', ')}: Estos ambientes requieren de tu atención. Inician clases a las ${classHour} hrs.`;lines.push('BEGIN:VEVENT',`UID:dashboard-upc-${formatDate(m.date)}-${m.classStart}-${i}@local`,`DTSTAMP:${stamp}`,`DTSTART;TZID=America/Lima:${alertTime}`,`DTEND;TZID=America/Lima:${endTime}`,`SUMMARY:${immediateReminderEscape(title)}`,`DESCRIPTION:${immediateReminderEscape(detail)}`,`LOCATION:${immediateReminderEscape(currentImmediatePavilion||'')}`,'STATUS:CONFIRMED','TRANSP:TRANSPARENT','X-MICROSOFT-CDO-BUSYSTATUS:FREE','X-MICROSOFT-CDO-INTENDEDSTATUS:FREE','BEGIN:VALARM','TRIGGER:PT0M','ACTION:DISPLAY',`DESCRIPTION:${immediateReminderEscape(detail)}`,'END:VALARM','END:VEVENT')});lines.push('END:VCALENDAR');return lines.join('\r\n')+'\r\n'}
 function downloadImmediateReminderBlob(blob,fileName){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=fileName;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)}
 function downloadImmediateReminderIcs(content,fileName){const blob=new Blob([content],{type:'text/calendar;charset=utf-8'}),file=new File([blob],fileName,{type:'text/calendar'});if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){navigator.share({files:[file],title:'Recordatorios de próximas clases'}).catch(e=>{if(e&&e.name!=='AbortError')downloadImmediateReminderBlob(blob,fileName)});return}downloadImmediateReminderBlob(blob,fileName)}
 function openImmediateUpcomingClassesNotificationPopup(){const ctx=currentImmediateActionState&&currentImmediateActionState.context?currentImmediateActionState.context:getImmediateActionClockContext(),selected=immediateReminderSelectedDate(),dateValue=immediateReminderDateInputValue(selected),start=ctx&&typeof ctx.nowMinutes==='number'?Math.max(0,Math.floor(ctx.nowMinutes/60)*60):7*60,end=ctx&&ctx.operationalDayEnd?ctx.operationalDayEnd:22*60;const body=`<div class="immediate-utility-help">Seleccione primero el rango de días y luego el rango de horas. Los recordatorios se crearán a las <strong>__:40</strong> cuando el ambiente esté libre y tenga una clase o reserva al iniciar la siguiente hora. Todos se importarán como <strong>Libre</strong>, nunca como Ocupado.</div><div class="immediate-utility-row"><div><label class="immediate-utility-label" for="immediateReminderStartDate">Día inicial</label><input id="immediateReminderStartDate" type="date" class="immediate-utility-input" value="${dateValue}"></div><div><label class="immediate-utility-label" for="immediateReminderEndDate">Día final</label><input id="immediateReminderEndDate" type="date" class="immediate-utility-input" value="${dateValue}"></div></div><div class="immediate-utility-row"><div><label class="immediate-utility-label" for="immediateReminderStart">Hora de inicio</label><input id="immediateReminderStart" type="time" class="immediate-utility-input" value="${formatMinutesToTime(start)}"></div><div><label class="immediate-utility-label" for="immediateReminderEnd">Hora final</label><input id="immediateReminderEnd" type="time" class="immediate-utility-input" value="${formatMinutesToTime(end)}"></div></div><div class="immediate-utility-help">El archivo reúne los recordatorios de todas las fechas y horas seleccionadas. Después de importarlo en Outlook o en un calendario compatible, funcionará con el dashboard cerrado.</div>`;const footer=`<button type="button" class="immediate-utility-btn primary" onclick="generateImmediateUpcomingClassReminders()"><i class="bi bi-calendar-plus"></i> Generar recordatorios</button><button type="button" class="immediate-utility-btn" onclick="closeImmediateUtilityModal()">Salir</button>`;openImmediateUtilityModal('Recordatorios de próximas clases',body,footer)}
@@ -2936,12 +2921,12 @@ async function shareImmediateTaskFromModal(){
             });
             
             document.getElementById('backToDashboard').addEventListener('click', showDashboard);
-            document.getElementById('backToFilters').addEventListener('click', showFiltersView);
+            document.getElementById('filtersViewBtn')?.addEventListener('click', showFiltersView);
             document.getElementById('showPavilionsBtn').addEventListener('click', showPavilions);
             document.getElementById('globalSearchBtn').addEventListener('click', showGlobalSearch);
-            document.getElementById('availableSpacesBtn').addEventListener('click', showAvailableSpacesPavilions);
+            document.getElementById('availableSpacesBtn').addEventListener('click', showAvailableSpacesEntry);
             document.getElementById('executeGlobalSearch').addEventListener('click', executeGlobalSearch);
-            document.getElementById('clearSearchBtn').addEventListener('click', clearSearchFields);
+            document.getElementById('clearSearchBtn')?.addEventListener('click', clearSearchFields);
             document.getElementById('showNextDatesBtn').addEventListener('click', showNextDates);
             document.getElementById('showPreviousDatesBtn').addEventListener('click', showPreviousDates);
             document.getElementById('printPdfBtn').addEventListener('click', generatePdf);
@@ -3140,6 +3125,79 @@ const _printLateBtn = document.getElementById('printLateReportBtn');
             }
         }
         
+        const DASHBOARD_DEFAULT_QUOTE='Olvídate de tu mal talante y enróllate con la de alante -- Hombres G.';
+        function openDashManual(){
+            const url=String(window.DASHBOARD_MANUAL_URL||'').trim();
+            if(!url){alert('Configure la URL personalizada del Manual del Dash.');return}
+            window.open(url,'_blank','noopener,noreferrer');
+        }
+        function setDashboardQuote(text){
+            const target=document.getElementById('dashboardWikiquoteText');
+            if(target)target.textContent=String(text||DASHBOARD_DEFAULT_QUOTE).trim()||DASHBOARD_DEFAULT_QUOTE;
+        }
+        function cleanWikiquoteCandidate(value){
+            return String(value||'').replace(/\[[^\]]*\]/g,'').replace(/^[-*#:\s]+/,'').replace(/\s+/g,' ').trim();
+        }
+        function getWikiquoteCandidate(extract){
+            const text=String(extract||'');
+            const candidates=[];
+            const quotePattern=/«([^«»]+)»/g;
+            let match;
+            while((match=quotePattern.exec(text))!==null){
+                const quote=cleanWikiquoteCandidate(match[1]);
+                if(quote.length>=20&&quote.length<=220&&!/[{}<>]/.test(quote))candidates.push(quote);
+            }
+            return candidates.length?candidates[Math.floor(Math.random()*candidates.length)]:'';
+        }
+        async function refreshDashboardWikiquote(){
+            setDashboardQuote(DASHBOARD_DEFAULT_QUOTE);
+            try{
+                const endpoint='https://es.wikiquote.org/w/api.php?action=query&format=json&origin=*&generator=random&grnnamespace=0&grnlimit=8&prop=extracts&explaintext=1&exsectionformat=plain&redirects=1';
+                const response=await fetch(endpoint,{cache:'no-store'});
+                if(!response.ok)throw new Error('Wikiquote HTTP '+response.status);
+                const data=await response.json(),pages=Object.values(data&&data.query&&data.query.pages?data.query.pages:{}).sort(()=>Math.random()-.5);
+                for(const page of pages){
+                    const quote=getWikiquoteCandidate(page&&page.extract);
+                    const author=cleanWikiquoteCandidate(page&&page.title);
+                    if(quote&&author&&!/^(categor[ií]a|wikiquote|plantilla|anexo):/i.test(author)){
+                        setDashboardQuote(`${quote} -- ${author}`);
+                        return true;
+                    }
+                }
+            }catch(error){console.warn('No se pudo cargar una cita aleatoria de Wikiquote:',error)}
+            setDashboardQuote(DASHBOARD_DEFAULT_QUOTE);
+            return false;
+        }
+
+        const DASHBOARD_BACKUP_FORMAT='dashboard-upc-backup',DASHBOARD_BACKUP_HISTORY_KEY='dashboardBackupImportHistory',DASHBOARD_BACKUP_DEFAULT_USER_KEY='dashboardBackupDefaultUser';
+        const DASHBOARD_BACKUP_OPERATIONAL_KEYS=['dashboardImmediateLampHours','dashboardImmediateMailNotes','dashboardImmediateMovedClasses','dashboardImmediateClosedAulas','dashboardImmediateDailyCleaningPending','dashboardImmediateDailyOpenPending','dashboardImmediateLastMinuteReservations','dashboardImmediateReadyShareHeaders','dashboardImmediateAllRoomsReportHeaders','dashboardImmediateCapacityOverrides'];
+        function backupKeys(scope){const a=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k)a.push(k)}if(scope==='lamp')return a.filter(k=>k==='dashboardImmediateLampHours');if(scope==='work')return a.filter(k=>DASHBOARD_BACKUP_OPERATIONAL_KEYS.includes(k));if(scope==='settings')return a.filter(k=>k.startsWith('dashboard')&&!DASHBOARD_BACKUP_OPERATIONAL_KEYS.includes(k)&&k!==DASHBOARD_BACKUP_HISTORY_KEY);return a.filter(k=>k!==DASHBOARD_BACKUP_HISTORY_KEY)}
+        function backupParse(v){try{return JSON.parse(v)}catch(e){return v}}
+        function backupDate(value){if(!value&&value!==0)return'';if(/^\d{4}-\d{2}-\d{2}$/.test(String(value)))return String(value);const d=new Date(value);return isNaN(d)?'':`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+        function backupObjectDate(o,fallback=''){if(!o||typeof o!=='object')return fallback;for(const k of ['dateKey','createdAt','updatedAt','startAt','endAt','backupExportedAt']){const d=backupDate(o[k]);if(d)return d}return fallback}
+        function filterBackupRange(value,from,to,parentDate=''){
+          if(Array.isArray(value))return value.filter(v=>{const d=backupObjectDate(v,parentDate);return !d||(d>=from&&d<=to)}).map(v=>filterBackupRange(v,from,to,backupObjectDate(v,parentDate)));
+          if(value&&typeof value==='object'){const own=backupObjectDate(value,parentDate),out={};for(const [k,v] of Object.entries(value)){const keyDate=backupDate(k),d=keyDate||backupObjectDate(v,own);if(d&&!(d>=from&&d<=to))continue;out[k]=filterBackupRange(v,from,to,d||own)}return out}return value
+        }
+        function collectBackup(scope,user,range){const storage={};backupKeys(scope).forEach(k=>{const raw=localStorage.getItem(k);if(raw!==null){let v=backupParse(raw);if(range&&scope==='work')v=filterBackupRange(v,range.from,range.to);storage[k]=v}});return{format:DASHBOARD_BACKUP_FORMAT,version:2,dashboardVersion:'v.00114',scope,exportedAt:new Date().toISOString(),exportedBy:user,dateRange:range||null,storage}}
+        function downloadBackup(data){const safe=String(data.exportedBy||'usuario').replace(/[^A-Za-z0-9_-]+/g,'-'),stamp=new Date().toISOString().replace(/[:.]/g,'-'),b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=`Dashboard-UPC-${data.scope}-${safe}-${stamp}.psalgado`;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+        function openDashboardWorkRangeChoice(){openImmediateUtilityModal('Compartir avance',`<div class="immediate-utility-help">¿Desea compartir avances de varios días? Si elige No, se compartirán solamente los avances del día de hoy.</div><div class="backup-range-choice"><button onclick="openDashboardBackupExport('work','today')"><i class="bi bi-calendar-day"></i><br>No, solo hoy</button><button onclick="openDashboardBackupDateRange()"><i class="bi bi-calendar-range"></i><br>Sí, varios días</button></div>`,`<button class="immediate-utility-btn" onclick="openDashboardBackupsMenu()">Volver</button>`)}
+        function openDashboardBackupDateRange(){const t=new Date().toISOString().slice(0,10);openImmediateUtilityModal('Periodo del avance',`<div class="immediate-utility-row"><div><label class="immediate-utility-label">Fecha inicial</label><input id="backupDateFrom" type="date" class="immediate-utility-input" value="${t}"></div><div><label class="immediate-utility-label">Fecha final</label><input id="backupDateTo" type="date" class="immediate-utility-input" value="${t}"></div></div>`,`<button class="immediate-utility-btn" onclick="openDashboardWorkRangeChoice()">Volver</button><button class="immediate-utility-btn primary" onclick="continueDashboardRangeExport()">Continuar</button>`)}
+        function continueDashboardRangeExport(){const f=document.getElementById('backupDateFrom')?.value,t=document.getElementById('backupDateTo')?.value;if(!f||!t||f>t){alert('Seleccione un rango de fechas válido.');return}openDashboardBackupExport('work','range',{from:f,to:t})}
+        function getDashboardBackupDefaultUser(){try{return String(localStorage.getItem(DASHBOARD_BACKUP_DEFAULT_USER_KEY)||'').trim()}catch(e){return''}}
+        function openDashboardBackupUserConfig(){const u=escapeHtml(getDashboardBackupDefaultUser());openImmediateUtilityModal('Usuario predeterminado',`<div class="immediate-utility-help">Este usuario se completará automáticamente en el campo <strong>Usuario de referencia</strong> de todas las exportaciones. Puede modificarlo antes de exportar.</div><div><label class="immediate-utility-label" for="dashboardBackupDefaultUser">Usuario</label><input id="dashboardBackupDefaultUser" class="immediate-utility-input" value="${u}" placeholder="Ej.: psalgado" autocomplete="username"></div>`,`<button class="immediate-utility-btn" onclick="openDashboardBackupsMenu()">Volver</button><button class="immediate-utility-btn secondary" onclick="clearDashboardBackupDefaultUser()">Eliminar</button><button class="immediate-utility-btn primary" onclick="saveDashboardBackupDefaultUser()"><i class="bi bi-save"></i> Guardar</button>`)}
+        function saveDashboardBackupDefaultUser(){const u=(document.getElementById('dashboardBackupDefaultUser')?.value||'').trim();if(!u){alert('Ingrese un usuario para guardar.');return}try{localStorage.setItem(DASHBOARD_BACKUP_DEFAULT_USER_KEY,u)}catch(e){alert('No se pudo guardar el usuario en este navegador.');return}alert('Usuario predeterminado guardado.');openDashboardBackupsMenu()}
+        function clearDashboardBackupDefaultUser(){try{localStorage.removeItem(DASHBOARD_BACKUP_DEFAULT_USER_KEY)}catch(e){}alert('Usuario predeterminado eliminado.');openDashboardBackupsMenu()}
+        function openDashboardBackupExport(scope,mode='',range=null){if(scope==='work'&&!mode){openDashboardWorkRangeChoice();return}if(scope==='work'&&mode==='today'){const t=new Date().toISOString().slice(0,10);range={from:t,to:t}}const label={all:'Backup completo',work:'Avance operativo',lamp:'Horas de lámparas',settings:'Configuración'}[scope]||scope,defaultUser=escapeHtml(getDashboardBackupDefaultUser());window.__dashboardBackupExport={scope,range};openImmediateUtilityModal('Exportar '+label,`<div class="immediate-utility-help">El usuario ingresado quedará como autor de los registros compartidos.</div><div><label class="immediate-utility-label">Usuario de referencia</label><input id="dashboardBackupUser" class="immediate-utility-input" value="${defaultUser}" placeholder="Ej.: psalgado" autocomplete="username"></div>${range?`<div class="immediate-utility-help"><strong>Periodo:</strong> ${range.from} al ${range.to}</div>`:''}`,`<button class="immediate-utility-btn" onclick="openDashboardBackupsMenu()">Volver</button><button class="immediate-utility-btn primary" onclick="confirmDashboardBackupExport()"><i class="bi bi-download"></i> Exportar</button>`)}
+
+        function confirmDashboardBackupExport(){const u=(document.getElementById('dashboardBackupUser')?.value||'').trim(),x=window.__dashboardBackupExport;if(!u){alert('Ingrese un usuario de referencia.');return}downloadBackup(collectBackup(x.scope,u,x.range));closeImmediateUtilityModal()}
+        function backupAttr(v,u,e){if(Array.isArray(v))return v.map(x=>backupAttr(x,u,e));if(v&&typeof v==='object'){const o={};Object.entries(v).forEach(([k,x])=>o[k]=backupAttr(x,u,e));o.backupContributor||=u;o.backupExportedAt||=e;o.backupImportedAt||=new Date().toISOString();return o}return v}
+        function backupMerge(a,b,u,e){b=backupAttr(b,u,e);if(Array.isArray(a)&&Array.isArray(b)){const m=new Map(a.map(x=>[JSON.stringify(x),x]));b.forEach(x=>m.set(JSON.stringify(x),x));return[...m.values()]}if(a&&b&&typeof a==='object'&&typeof b==='object'&&!Array.isArray(a)&&!Array.isArray(b)){const o={...a};Object.entries(b).forEach(([k,v])=>o[k]=k in o?backupMerge(o[k],v,u,e):v);return o}return b}
+        function openDashboardBackupImport(scope='any'){openImmediateUtilityModal('Importar backup',`<div class="immediate-utility-help">Seleccione un archivo de respaldo con extensión <strong>.psalgado</strong>.</div><div><label class="immediate-utility-label">Archivo</label><input id="dashboardBackupFile" type="file" accept=".psalgado" class="immediate-utility-input"></div><div><label class="immediate-utility-label">Método</label><select id="dashboardBackupMode" class="immediate-utility-select"><option value="merge">Combinar sin borrar avances locales</option><option value="replace">Reemplazar grupos incluidos</option></select></div>`,`<button class="immediate-utility-btn" onclick="openDashboardBackupsMenu()">Volver</button><button class="immediate-utility-btn primary" onclick="confirmDashboardBackupImport('${scope}')">Importar</button>`)}
+        async function confirmDashboardBackupImport(expected){const f=document.getElementById('dashboardBackupFile')?.files?.[0],mode=document.getElementById('dashboardBackupMode')?.value;if(!f){alert('Seleccione un archivo .psalgado.');return}if(!/\.psalgado$/i.test(f.name)){alert('Archivo no compatible. Solo se permiten archivos con extension .psalgado.');return}try{const d=JSON.parse(await f.text());if(d.format!==DASHBOARD_BACKUP_FORMAT||!d.storage)throw Error('Formato inválido');if(expected!=='any'&&d.scope!==expected&&d.scope!=='all')throw Error('Tipo de backup diferente');const u=d.exportedBy||'usuario externo';if(!confirm(`Información compartida por ${u}. ¿Continuar?`))return;Object.entries(d.storage).forEach(([k,v])=>{const raw=localStorage.getItem(k),local=raw===null?undefined:backupParse(raw),out=mode==='replace'||local===undefined?backupAttr(v,u,d.exportedAt):backupMerge(local,v,u,d.exportedAt);localStorage.setItem(k,typeof out==='string'?out:JSON.stringify(out))});let h=backupParse(localStorage.getItem(DASHBOARD_BACKUP_HISTORY_KEY)||'[]');if(!Array.isArray(h))h=[];h.push({sharedBy:u,scope:d.scope,importedAt:new Date().toISOString(),dateRange:d.dateRange||null});localStorage.setItem(DASHBOARD_BACKUP_HISTORY_KEY,JSON.stringify(h.slice(-50)));closeImmediateUtilityModal();alert(`Backup de ${u} importado correctamente.`);loadAcademicSoftwareStorage()}catch(e){alert('No se pudo importar: '+e.message)}}
+        function openDashboardBackupHistory(){let h=backupParse(localStorage.getItem(DASHBOARD_BACKUP_HISTORY_KEY)||'[]');const x=Array.isArray(h)&&h.length?h.slice().reverse().map(v=>`<div class="immediate-note-item"><strong>${escapeHtml(v.sharedBy||'Usuario')}</strong> · ${escapeHtml(v.scope||'')}<time>${escapeHtml(new Date(v.importedAt).toLocaleString('es-PE'))}</time></div>`).join(''):'<div class="immediate-note-item">Sin importaciones.</div>';openImmediateUtilityModal('Historial',`<div class="immediate-note-list">${x}</div>`,`<button class="immediate-utility-btn" onclick="openDashboardBackupsMenu()">Volver</button>`)}
+        function openDashboardBackupsMenu(){openImmediateUtilityModal('Backups',`<div class="backup-menu-grid"><button class="backup-menu-card" onclick="openDashboardBackupExport('all')"><i class="bi bi-database-down"></i>Exportar todo</button><button class="backup-menu-card" onclick="openDashboardBackupImport()"><i class="bi bi-database-up"></i>Importar archivo</button><button class="backup-menu-card" onclick="openDashboardWorkRangeChoice()"><i class="bi bi-people"></i>Compartir avance</button><button class="backup-menu-card" onclick="openDashboardBackupImport('work')"><i class="bi bi-person-check"></i>Recibir avance</button><button class="backup-menu-card" onclick="openDashboardBackupExport('lamp')"><i class="bi bi-projector"></i>Exportar lámparas</button><button class="backup-menu-card" onclick="openDashboardBackupImport('lamp')"><i class="bi bi-projector-fill"></i>Importar lámparas</button><button class="backup-menu-card" onclick="openDashboardBackupExport('settings')"><i class="bi bi-sliders"></i>Configuración</button><button class="backup-menu-card" onclick="openDashboardBackupHistory()"><i class="bi bi-clock-history"></i>Historial</button><button class="backup-menu-card" onclick="openDashboardBackupUserConfig()"><i class="bi bi-person-gear"></i>Usuario predeterminado</button></div>`,`<button class="immediate-utility-btn" onclick="closeImmediateUtilityModal()">Cerrar</button>`)}
+
         // Funciones de navegación
         function showDashboard() {
             hideAllViews();
@@ -3158,11 +3216,27 @@ const _printLateBtn = document.getElementById('printLateReportBtn');
  focusTodayResults();
         }
         
+        const GLOBAL_CAMPUS_STORAGE_KEY = 'dashboardGlobalCampusSelection';
+        function getGlobalCampusValue(item){return String(getItemFieldInsensitive(item,'CAMPUS') || '').trim()}
+        function getSavedCampusSelection(){const saved=localStorage.getItem(GLOBAL_CAMPUS_STORAGE_KEY)||'';const campuses=[...new Set((excelData||[]).map(getGlobalCampusValue).filter(Boolean))];return campuses.includes(saved)?saved:''}
+        function populateCampusSelectById(id,onchange){const select=document.getElementById(id);if(!select)return'';const campuses=[...new Set((excelData||[]).map(getGlobalCampusValue).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es',{sensitivity:'base'}));select.innerHTML='<option value="">Todos los campus</option>'+campuses.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');select.value=getSavedCampusSelection();select.onchange=()=>{try{localStorage.setItem(GLOBAL_CAMPUS_STORAGE_KEY,select.value||'')}catch(e){};if(typeof onchange==='function')onchange(select.value||'')};return select.value||''}
+        function rowsForCampus(campus){return campus?(excelData||[]).filter(item=>getGlobalCampusValue(item)===campus):(excelData||[])}
+        function showAvailableSpacesEntry(){showGlobalSearch();showAvailableSpacesPavilions();setTimeout(()=>document.getElementById('pavilionSectionGlobal')?.scrollIntoView({behavior:'smooth',block:'start'}),0)}
+        function populateGlobalCampusSelect(){
+            const select=document.getElementById('globalCampusSelect');if(!select)return;
+            const campuses=[...new Set((excelData||[]).map(getGlobalCampusValue).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es',{sensitivity:'base'}));
+            const saved=localStorage.getItem(GLOBAL_CAMPUS_STORAGE_KEY)||'';
+            select.innerHTML='<option value="">Todos los campus</option>'+campuses.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+            select.value=campuses.includes(saved)?saved:'';
+            select.onchange=()=>{try{localStorage.setItem(GLOBAL_CAMPUS_STORAGE_KEY,select.value||'')}catch(e){}};
+        }
+
         function showGlobalSearch() {
             hideImmediateActionsPanel();
             hideAllViews();
             globalSearchView.classList.remove('hidden');
             currentView = 'globalSearch';
+            populateGlobalCampusSelect();
         }
         
         function hideAllViews() {
@@ -3193,6 +3267,8 @@ const _printLateBtn = document.getElementById('printLateReportBtn');
             document.getElementById('courseGlobalSearch').value = '';
             document.getElementById('nrcSearch').value = '';
             document.getElementById('classroomSearch').value = '';
+            const softwareInput = document.getElementById('softwareGlobalSearch');
+            if (softwareInput) softwareInput.value = '';
             
             // Ocultar resultados
             globalResultsSection.classList.add('hidden');
@@ -3373,6 +3449,7 @@ const _printLateBtn = document.getElementById('printLateReportBtn');
       invalidateDashboardDataCache();
       optimizeDashboardDataForRendering();
       showFiltersView();
+      refreshDashboardWikiquote();
       return;
     }
 
@@ -3388,6 +3465,7 @@ const _printLateBtn = document.getElementById('printLateReportBtn');
       invalidateDashboardDataCache();
       optimizeDashboardDataForRendering();
       showFiltersView();
+      refreshDashboardWikiquote();
       return;
     }
 
@@ -3679,6 +3757,7 @@ async function processExcelBuffer(buffer, fileName = 'archivo.xlsx', fileObj = n
 
     loadingSection.classList.add('hidden');
     showFiltersView();
+    refreshDashboardWikiquote();
   } catch (error) {
     console.error('Error processing Excel file:', error);
     alert('Error al procesar el archivo Excel. Asegúrate de que tiene el formato correcto.');
@@ -3935,6 +4014,13 @@ async function processExcelBuffer(buffer, fileName = 'archivo.xlsx', fileObj = n
                     if (!courseName.includes(courseQuery)) return false;
                 }
                 
+                // Filtrar por software asignado
+                if (softwareQuery) {
+                    const softwareList = getAcademicSoftwareForClass(item);
+                    const softwareText = normalizeString(softwareList.map(sw => `${sw.NOM_SOFTWARE || ''} ${sw['VERSIÓN'] || ''}`).join(' '));
+                    if (!softwareText.includes(softwareQuery)) return false;
+                }
+
                 // Filtrar por NRC si hay query (búsqueda exacta)
                 if (nrcQuery && item['NRC']) {
                     const nrc = item['NRC'].toString().trim();
@@ -4435,6 +4521,17 @@ function saveImmediateCustomIconFromModal(){const entry=immediateUtilityModalSta
 async function executeImmediateCustomIcon(button,id){const cfg=getImmediateCustomIconStorage().find(x=>x&&x.id===id);if(!cfg)return;const details=button.closest('details.immediate-card-collapsible');const idx=parseInt(details?.getAttribute('data-entry-index')||'',10);const entry=(currentImmediateActionState&&currentImmediateActionKey&&!isNaN(idx))?(currentImmediateActionState.actionData[currentImmediateActionKey]||[])[idx]:null;if(cfg.text)await copySimpleTextToClipboard(cfg.text);if(cfg.link)window.open(cfg.link,'_blank','noopener,noreferrer');for(const action of (cfg.actions||[])){try{await runImmediateCustomAction(action,button,entry)}catch(e){console.warn('Acción personalizada falló:',action,e)}}}
 async function runImmediateCustomAction(action,button,entry){switch(action){case'info':if(entry&&entry.item)showDetailModal(entry.item);break;case'shareCard':shareImmediateCard(button);break;case'reservations':window.open('https://upc-e2g-post.u-planner.com/booking/control-panel','_blank','noopener,noreferrer');break;case'reserve':window.open('https://upc-e2g-post.u-planner.com/booking/reservation','_blank','noopener,noreferrer');break;case'cleaning':openImmediateIncidentModal('cleaning',button);break;case'maintenance':openImmediateIncidentModal('maintenance',button);break;case'reminder':openImmediateReminderModal(button);break;case'mail':openImmediateMailModal(button);break;case'closeRoom':toggleImmediateAulaClosed(button);break;case'freeWeek':copyImmediateWeekFreeSlots(button);break;case'schedule':if(entry)openScheduleForClassroom(entry.aula,{openInNewTab:true,autoMobileFit:true});break;case'techReport':openImmediateTechnicalReportMenu(button);break;case'copyUser':{const opts=entry?getImmediateUserOptions(entry):[];if(opts.length)await copySimpleTextToClipboard(getImmediateCopyUserValue(opts[0]));break}case'reportClass':openImmediateReportClassModal(button);break;case'attention':confirmImmediateAttentionRecord(button);break;case'move':moveImmediateClass(button);break;case'dailyCleaning':toggleDailyCleaningPending(button);break;case'dailyOpen':toggleDailyOpenPending(button);break;case'aforo':openImmediateAforoModal(button);break;case'validate':openImmediateValidationModal(button);break}}
 
+const IMMEDIATE_LAMP_HOURS_KEY='dashboardImmediateLampHours';
+function getImmediateLampHours(){return storageObj(IMMEDIATE_LAMP_HOURS_KEY)}
+function saveImmediateLampHours(x){saveObj(IMMEDIATE_LAMP_HOURS_KEY,x)}
+function getImmediateLampKey(aula,dateKey=getTodayKey()){return `${String(aula||'').trim().toUpperCase()}|${dateKey}`}
+function openImmediateLampHoursModal(button){const entry=getImmediateEntryFromButton(button);if(!entry||!entry.aula)return;immediateUtilityModalState={type:'lampHours',entry};const all=getImmediateLampHours(),today=getTodayKey(),saved=all[getImmediateLampKey(entry.aula,today)]||{};const body=`<div class="immediate-utility-help">Registre las horas actuales de la lámpara del proyector para ${escapeHtml(entry.aula)}.</div><div class="immediate-utility-row"><div><label class="immediate-utility-label" for="lampNormal">Normal</label><input id="lampNormal" type="number" min="0" step="1" class="immediate-utility-input" value="${escapeHtml(saved.normal??'')}"></div><div><label class="immediate-utility-label" for="lampEco">Eco</label><input id="lampEco" type="number" min="0" step="1" class="immediate-utility-input" value="${escapeHtml(saved.eco??'')}"></div></div>`;const footer=`<button class="immediate-utility-btn" onclick="closeImmediateUtilityModal()">Cancelar</button><button class="immediate-utility-btn primary" onclick="saveImmediateLampHoursModal()">Guardar</button>`;openImmediateUtilityModal('Registro de horas de lámpara',body,footer)}
+function saveImmediateLampHoursModal(){const entry=immediateUtilityModalState.entry,n=document.getElementById('lampNormal')?.value,e=document.getElementById('lampEco')?.value;if(!entry||n===''||e===''||+n<0||+e<0){alert('Complete los valores numéricos Normal y Eco.');return}const all=getImmediateLampHours();all[getImmediateLampKey(entry.aula)]={aula:entry.aula,normal:+n,eco:+e,dateKey:getTodayKey(),updatedAt:new Date().toISOString()};saveImmediateLampHours(all);closeImmediateUtilityModal()}
+function getImmediateLampReportRooms(){return (currentImmediateActionState?.actionData?.allRooms||[]).filter(r=>r&&r.aula&&!r.isMiscNotes).slice().sort((a,b)=>compareClassroomCodes(a.aula,b.aula))}
+function getImmediateLampRecentRecord(aula){const all=getImmediateLampHours(),today=new Date(),y=new Date(today);y.setDate(y.getDate()-1);return all[getImmediateLampKey(aula,formatDate(today))]||all[getImmediateLampKey(aula,formatDate(y))]||null}
+function openImmediateLampReport(){const rooms=getImmediateLampReportRooms(),missing=rooms.filter(r=>{const x=getImmediateLampRecentRecord(r.aula);return !x||x.normal===undefined||x.eco===undefined});if(missing.length){openImmediateUtilityModal('Horas de lámparas pendientes',`<div class="immediate-utility-help">Faltan registros completos de hoy o ayer para:</div><div class="immediate-note-list">${missing.map(r=>`<div class="immediate-note-item">${escapeHtml(r.aula)}</div>`).join('')}</div>`,`<button class="immediate-utility-btn" onclick="closeImmediateUtilityModal()">Cerrar</button>`);return}openImmediateUtilityModal('Horas de lámparas',`<div class="immediate-utility-help">¿Desea incluir el nombre del aula?</div>`,`<button class="immediate-utility-btn" onclick="showImmediateLampReport(false)">Sin aula</button><button class="immediate-utility-btn primary" onclick="showImmediateLampReport(true)">Con aula</button><button class="immediate-utility-btn" onclick="openAllRoomsSharePopup()">Volver</button>`)}
+function showImmediateLampReport(withAula){const text=getImmediateLampReportRooms().map(r=>{const x=getImmediateLampRecentRecord(r.aula);return withAula?`${r.aula}\t${x.normal}\t${x.eco}`:`${x.normal}\t${x.eco}`}).join('\n');openImmediateUtilityModal('Reporte de horas de lámparas',`<textarea id="lampReportOutput" class="immediate-utility-textarea lamp-report-output" readonly>${escapeHtml(text)}</textarea>`,`<button class="immediate-utility-btn" onclick="openAllRoomsSharePopup()">Volver</button><button class="immediate-utility-btn primary" onclick="copySimpleTextToClipboard(document.getElementById('lampReportOutput').value);alert('Reporte copiado.')">Copiar</button>`)}
+
 function buildImmediateDetailActions(entry) {
  const actionDef=getImmediateActionDefinition(currentImmediateActionKey);const isClassActionCard=!!(actionDef&&actionDef.resultType==='class'&&entry&&entry.item);const isRoomActionCard=!!(actionDef&&actionDef.resultType==='room'&&entry&&entry.aula);const canRoomUtility=isClassActionCard||isRoomActionCard;const userOptions=isClassActionCard?getImmediateUserOptions(entry):[];const broomSvg=`<span class="immediate-broom-svg" aria-hidden="true" style="font-size:1.15rem;line-height:1;display:inline-flex;align-items:center;justify-content:center">🧹</span>`;
  const infoButton=isClassActionCard?`<button type="button" class="immediate-icon-btn immediate-general-info-btn" title="Información general del curso" aria-label="Información general del curso"><i class="bi bi-info-circle"></i></button>`:'';const shareButton=(entry&&entry.aula)?`<button type="button" class="immediate-icon-btn immediate-share-card-btn" title="Compartir tarjeta" aria-label="Compartir tarjeta" onclick="handleImmediateShareCard(this)"><i class="bi bi-share"></i></button>`:'';
@@ -4442,7 +4539,7 @@ function buildImmediateDetailActions(entry) {
  const cleaningButton=(canRoomUtility&&!entry.isMiscNotes)?`<button type="button" class="immediate-icon-btn immediate-clean-request-btn" title="Solicitud de limpieza" aria-label="Solicitud de limpieza" onclick="openImmediateIncidentModal('cleaning', this)">${broomSvg}</button>`:'';const maintenanceButton=(canRoomUtility&&!entry.isMiscNotes)?`<button type="button" class="immediate-icon-btn immediate-maintenance-request-btn" title="Solicitud de mantenimiento" aria-label="Solicitud de mantenimiento" onclick="openImmediateIncidentModal('maintenance', this)"><i class="bi bi-hammer"></i></button>`:'';const reminderButton=canRoomUtility?`<button type="button" class="immediate-icon-btn immediate-reminder-btn" title="Crear tarea / recordatorio" aria-label="Crear tarea / recordatorio" onclick="openImmediateReminderModal(this)"><i class="bi bi-bell"></i></button>`:'';const mailButton=canRoomUtility?`<button type="button" class="immediate-icon-btn immediate-mail-note-btn" title="Guardar texto" aria-label="Guardar texto" onclick="openImmediateMailModal(this)"><i class="bi bi-envelope"></i></button>`:'';const closedInfo=canRoomUtility?getImmediateClosedInfo(entry):null;const keyTitle=closedInfo?'Reabrir aula':'Cerrar aula hasta fin del día';const keyButton=(canRoomUtility&&!entry.isMiscNotes)?`<button type="button" class="immediate-icon-btn immediate-lock-room-btn" title="${escapeHtml(keyTitle)}" aria-label="${escapeHtml(keyTitle)}" onclick="toggleImmediateAulaClosed(this)"><i class="bi bi-key"></i></button>`:'';const scheduleButton=entry&&entry.aula&&!entry.isMiscNotes?`<button type="button" class="immediate-icon-btn immediate-weekly-schedule-btn" title="Horario semanal del aula" aria-label="Horario semanal del aula"><i class="bi bi-calendar-week"></i></button>`:'';const technicalReportButtons=(canRoomUtility&&entry&&entry.aula&&!entry.isMiscNotes&&isImmediateTechReportActionEnabled(actionDef&&actionDef.key))?`<button type="button" class="immediate-icon-btn immediate-tech-report-btn" title="Informe técnico" aria-label="Informe técnico" onclick="openImmediateTechnicalReportMenu(this)"><i class="bi bi-file-earmark-text"></i></button><a href="https://laureateprod.service-now.com" target="_blank" rel="noopener noreferrer" class="immediate-icon-btn immediate-it-service-btn" title="IT Service" aria-label="IT Service" onclick="event.stopPropagation()"><i class="bi bi-headset"></i></a>`:'';const allRoomsUtilityButtons=(actionDef&&actionDef.key==='allRooms'&&entry&&entry.aula)?`<button type="button" class="immediate-icon-btn immediate-next-clean-btn" title="Pendiente limpieza día siguiente" aria-label="Pendiente limpieza día siguiente" onclick="toggleDailyCleaningPending(this)"><span class="immediate-red-broom">🧹</span></button><button type="button" class="immediate-icon-btn immediate-open-pending-btn" title="Ambiente queda abierto para cierre" aria-label="Ambiente queda abierto para cierre" onclick="toggleDailyOpenPending(this)"><i class="bi bi-door-open"></i></button><button type="button" class="immediate-icon-btn immediate-aforo-btn" title="Aforo" aria-label="Aforo" onclick="openImmediateAforoModal(this)"><i class="bi bi-people-fill"></i></button>`:'';
  const copyButton=userOptions.length?`<span class="immediate-copy-wrap"><button type="button" class="immediate-icon-btn immediate-copy-user-btn" title="Copiar usuario" aria-label="Copiar usuario"><i class="bi bi-clipboard"></i></button>${userOptions.length>1?`<div class="immediate-copy-popup hidden"><div class="immediate-copy-popup-title">Seleccionar usuario para copiar</div>${userOptions.map((item,index)=>`<button type="button" class="immediate-copy-option" data-usuario="${escapeHtml(getImmediateCopyUserValue(item))}"><strong>Docente ${(index+1).toString().padStart(2,'0')}</strong><span>${escapeHtml(item.docente)} | ${escapeHtml(item.usuario || getImmediateCopyUserValue(item))}</span></button>`).join('')}</div>`:''}</span><span class="immediate-copy-feedback hidden">Copiado</span>`:'';
  const hasNrc=!!getImmediateEntryNrc(entry);const customIconButtons=buildImmediateCustomIconButtons(entry);const validationButton=(entry&&entry.aula&&!entry.isMiscNotes&&shouldShowValidationButton(actionDef&&actionDef.key))?`<button type="button" class="immediate-icon-btn immediate-validate-btn" title="Validar" aria-label="Validar" onclick="openImmediateValidationModal(this)"><i class="bi bi-camera-video"></i></button>`:'';const quickPhotoButton=(actionDef&&actionDef.key==='allRooms'&&entry&&entry.aula&&!entry.isMiscNotes)?`<button type="button" class="immediate-icon-btn immediate-quick-photo-btn" title="Foto" aria-label="Foto" onclick="openImmediateQuickPhotoModal(this)"><i class="bi bi-camera"></i></button>`:'';const clockButton=(entry&&entry.aula&&!entry.isMiscNotes)?`<button type="button" class="immediate-icon-btn immediate-free-week-btn" title="Copiar horarios libres restantes de la semana" aria-label="Copiar horarios libres restantes de la semana" onclick="copyImmediateWeekFreeSlots(this)"><i class="bi bi-clock"></i></button>`:'';const reportButton=(isClassActionCard&&hasNrc)?`<button type="button" class="immediate-icon-btn immediate-report-class-btn" title="Reportar" aria-label="Reportar" onclick="openImmediateReportClassModal(this)"><i class="bi bi-flag-fill" style="color:#dc3545"></i></button>`:'';const lastMinuteReserveButton='';const pencilButton=(isClassActionCard||(actionDef&&actionDef.key==='allRooms'&&entry&&entry.aula&&!entry.isMiscNotes))?`<button type="button" class="immediate-icon-btn immediate-attention-pencil-btn" title="Registro de atención" aria-label="Registro de atención" onclick="confirmImmediateAttentionRecord(this)"><i class="bi bi-pencil-square"></i></button>`:'';const movedInfo=isClassActionCard?getImmediateMoveInfo(entry):null;const moveTitle=movedInfo?`Desmarcar clase movida (destino: ${movedInfo.destino||''})`:'Mover';const moveButton=isClassActionCard?`<button type="button" class="immediate-icon-btn immediate-move-class-btn" title="${escapeHtml(moveTitle)}" aria-label="${escapeHtml(moveTitle)}" onclick="moveImmediateClass(this)"><i class="bi bi-arrow-left-right"></i></button>`:'';
- return `<div class="immediate-detail-actions">${infoButton}${shareButton}${viewReservationsButton}${reserveButton}${cleaningButton}${maintenanceButton}${reminderButton}${mailButton}${keyButton}${clockButton}${scheduleButton}${technicalReportButtons}${lastMinuteReserveButton}${copyButton}${reportButton}${pencilButton}${moveButton}${allRoomsUtilityButtons}${validationButton}${quickPhotoButton}${customIconButtons}</div>`;
+ return `<div class="immediate-detail-actions">${infoButton}${shareButton}${viewReservationsButton}${reserveButton}${cleaningButton}${maintenanceButton}${reminderButton}${mailButton}${keyButton}${clockButton}${scheduleButton}${technicalReportButtons}${lastMinuteReserveButton}${copyButton}${reportButton}${pencilButton}${moveButton}${allRoomsUtilityButtons}${validationButton}${quickPhotoButton}<button type="button" class="immediate-icon-btn immediate-lamp-hours-btn" title="Horas de lámparas" aria-label="Horas de lámparas" onclick="openImmediateLampHoursModal(this)"><i class="bi bi-projector"></i></button>${customIconButtons}</div>`;
 }
 
 function hideImmediateUserPopups(exceptWrap = null) {
@@ -4680,6 +4777,14 @@ function saveImmediateActionOrderFromDom(){saveImmediateActionOrder(Array.from(d
 function clearImmediateActionDragStyles(){document.querySelectorAll('#immediateActionsMenu .immediate-action-tile').forEach(x=>x.classList.remove('immediate-dragging','immediate-drag-over'))}
 function bindImmediateActionTileDrag(button,key){button.draggable=true;button.dataset.actionKey=key;button.addEventListener('dragstart',e=>{immediateDraggedActionKey=key;immediateDraggedActionElement=button;button.classList.add('immediate-dragging');if(e.dataTransfer){e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',key)}});button.addEventListener('dragover',e=>{e.preventDefault();if(immediateDraggedActionKey&&immediateDraggedActionKey!==key)button.classList.add('immediate-drag-over')});button.addEventListener('dragleave',()=>button.classList.remove('immediate-drag-over'));button.addEventListener('drop',e=>{e.preventDefault();const source=immediateDraggedActionElement,target=button;if(!source||source===target)return;const x=window.scrollX,y=window.scrollY,menu=target.parentElement,sr=source.getBoundingClientRect(),tr=target.getBoundingClientRect(),after=(sr.top<tr.top)||(Math.abs(sr.top-tr.top)<8&&sr.left<tr.left);menu.insertBefore(source,after?target.nextSibling:target);saveImmediateActionOrderFromDom();immediateDraggedActionKey='';immediateDraggedActionElement=null;clearImmediateActionDragStyles();window.scrollTo({left:x,top:y,behavior:'auto'});requestAnimationFrame(()=>window.scrollTo({left:x,top:y,behavior:'auto'}))});button.addEventListener('dragend',()=>{immediateDraggedActionKey='';immediateDraggedActionElement=null;clearImmediateActionDragStyles()})}
 
+const IMMEDIATE_HIDDEN_ACTIONS_KEY='dashboardImmediateHiddenActionSections';
+function getImmediateHiddenActionKeys(){try{const x=JSON.parse(localStorage.getItem(IMMEDIATE_HIDDEN_ACTIONS_KEY)||'[]');return Array.isArray(x)?x:[]}catch(e){return[]}}
+function saveImmediateHiddenActionKeys(x){try{localStorage.setItem(IMMEDIATE_HIDDEN_ACTIONS_KEY,JSON.stringify(x||[]))}catch(e){}}
+function hideImmediateActionSection(key){const x=getImmediateHiddenActionKeys();if(!x.includes(key))x.push(key);saveImmediateHiddenActionKeys(x);showImmediateActionsHome()}
+function restoreImmediateActionSection(key){saveImmediateHiddenActionKeys(getImmediateHiddenActionKeys().filter(k=>k!==key));showImmediateActionsHome()}
+function renderImmediateHiddenActionsBlind(menu,keys){if(!menu||!keys.length)return;const defs=keys.map(getImmediateActionDefinition).filter(Boolean);const wrap=document.createElement('div');wrap.className='immediate-hidden-blind';wrap.innerHTML=`<button type="button" onclick="this.parentElement.classList.toggle('open')"><i class="bi bi-chevron-double-down"></i> Apartados ocultos (${defs.length})</button><div class="immediate-hidden-items">${defs.map(d=>`<button class="immediate-hidden-mini" onclick="openImmediateActionByKey('${d.key}')" oncontextmenu="event.preventDefault();restoreImmediateActionSection('${d.key}')"><i class="bi ${d.icon}"></i> ${escapeHtml(d.label)} <small>(mantenga presionado para mostrar)</small></button>`).join('')}</div>`;menu.appendChild(wrap);bindImmediateHiddenRestoreLongPress(wrap)}
+function bindImmediateHiddenRestoreLongPress(root){root.querySelectorAll('.immediate-hidden-mini').forEach(b=>{let t;b.addEventListener('pointerdown',()=>t=setTimeout(()=>{const m=b.getAttribute('oncontextmenu')||'';const k=(m.match(/restoreImmediateActionSection\('([^']+)'\)/)||[])[1];if(k)restoreImmediateActionSection(k)},650));['pointerup','pointercancel','pointerleave'].forEach(e=>b.addEventListener(e,()=>clearTimeout(t)))})}
+
 function showImmediateActionsHome() {
  if (!currentImmediatePavilion) {
   showImmediatePavilionSelector();
@@ -4704,23 +4809,26 @@ function showImmediateActionsHome() {
  const ctx = currentImmediateActionState.context;
  contextLine.innerHTML = `<i class="bi bi-clock-history"></i> Fecha de revisión: <strong>${formatDateForDisplay(ctx.selectedDate)}</strong> | Hora actual: <strong>${formatMinutesToTime(ctx.nowMinutes)}</strong> | Bloque actual: <strong>${ctx.currentHourLabel}</strong>`;
  menu.innerHTML = '';
+ const hiddenActions=getImmediateHiddenActionKeys();
  getOrderedImmediateActionDefinitions().forEach(def => {
+  if(hiddenActions.includes(def.key)) return;
   const count = Array.isArray(currentImmediateActionState.actionData[def.key]) ? currentImmediateActionState.actionData[def.key].length : 0;
   const button = document.createElement('button');
   button.type = 'button';
   button.className = `immediate-action-tile ${def.tileClass || ''}`;
-  button.innerHTML = `
+  button.innerHTML = `<button type="button" class="immediate-action-hide-btn" title="Ocultar apartado" aria-label="Ocultar apartado" onclick="event.stopPropagation();hideImmediateActionSection('${def.key}')"><i class="bi bi-dash"></i></button>
    <div class="immediate-action-top">
      <span class="immediate-action-icon ${def.style}"><i class="bi ${def.icon}"></i></span>
      <span style="display:inline-flex;align-items:center;gap:7px"><span class="immediate-action-count">${count}</span>${def.key==='classesAtConfiguredTime'?`<span class="immediate-action-count" title="Configurar hora"><i class="bi bi-clock"></i></span>`:''}</span>
    </div>
    <div class="immediate-action-title">${escapeHtml(def.label)}</div>
    <div class="immediate-action-description">${escapeHtml(def.description)}</div>
-   <div class="immediate-drag-hint"><i class="bi bi-grip-vertical"></i> Arrastre para ordenar</div>`;
+   <div class="immediate-drag-hint"><i class="bi bi-grip-vertical"></i> Arrastre como prefiera</div>`;
   button.addEventListener('click', () => openImmediateActionByKey(def.key));
   bindImmediateActionTileDrag(button,def.key);
   menu.appendChild(button);
  });
+ renderImmediateHiddenActionsBlind(menu,hiddenActions);
  ensureImmediateFloatingButtons();
  setTimeout(()=>scrollToImmediateFirstCard(),60);
 }
@@ -4897,6 +5005,36 @@ function updateImmediateActionSearchCounts(){let total=0;const floors=Array.from
 function restoreImmediateActionSearch(){document.querySelectorAll('#immediateActionResultsContainer details.immediate-card-collapsible').forEach(card=>{card.hidden=false;card.classList.remove('immediate-allrooms-search-match');if(card.dataset.searchWasOpen==='0')card.open=false;delete card.dataset.searchWasOpen});document.querySelectorAll('#immediateActionResultsContainer .immediate-line,#immediateActionResultsContainer .immediate-note-item,#immediateActionResultsContainer details').forEach(el=>{el.hidden=false;if(el.matches('details')&&el.dataset.searchNestedWasOpen==='0')el.open=false;delete el.dataset.searchNestedWasOpen});updateImmediateActionSearchCounts()}
 function filterImmediateActionCards(value){if(!currentImmediateActionKey)return;const q=normalizeImmediateSearchText(value);immediateAllRoomsSearchValue=String(value||'');document.getElementById('allRoomsSearchClearBtn')?.classList.toggle('hidden',!q);const cards=Array.from(document.querySelectorAll('#immediateActionResultsContainer details.immediate-card-collapsible'));if(!q){restoreImmediateActionSearch();return}cards.forEach(card=>{if(card.dataset.searchWasOpen===undefined)card.dataset.searchWasOpen=card.open?'1':'0';const cardMatch=normalizeImmediateSearchText(card.textContent).includes(q);card.hidden=!cardMatch;card.classList.toggle('immediate-allrooms-search-match',cardMatch);if(!cardMatch)return;card.open=true;const lines=Array.from(card.querySelectorAll('.immediate-card-body > .immediate-line'));const hasClassDetails=lines.some(isImmediateClassCoreLine);lines.forEach(line=>{const found=normalizeImmediateSearchText(line.textContent).includes(q);line.hidden=!(found||(hasClassDetails&&isImmediateClassCoreLine(line)))});card.querySelectorAll('.immediate-note-item').forEach(note=>note.hidden=!normalizeImmediateSearchText(note.textContent).includes(q));card.querySelectorAll('.immediate-card-body details').forEach(detail=>{if(detail.dataset.searchNestedWasOpen===undefined)detail.dataset.searchNestedWasOpen=detail.open?'1':'0';const found=normalizeImmediateSearchText(detail.textContent).includes(q);detail.hidden=!found;if(found)detail.open=true})});updateImmediateActionSearchCounts()}
 function configureAllRoomsSearchControls(key){const controls=document.getElementById('allRoomsSearchControls'),input=document.getElementById('allRoomsSearchInput'),clear=document.getElementById('allRoomsSearchClearBtn');if(!controls)return;const show=!!key;controls.classList.toggle('hidden',!show);if(input)input.value=immediateAllRoomsSearchValue;if(clear)clear.classList.toggle('hidden',!normalizeImmediateSearchText(immediateAllRoomsSearchValue))}
+const IMMEDIATE_HIDDEN_ICONS_KEY='dashboardImmediateHiddenCardIcons';
+function getImmediateHiddenIconKeys(){try{const x=JSON.parse(localStorage.getItem(IMMEDIATE_HIDDEN_ICONS_KEY)||'[]');return Array.isArray(x)?x:[]}catch(e){return[]}}
+function saveImmediateHiddenIconKeys(x){try{localStorage.setItem(IMMEDIATE_HIDDEN_ICONS_KEY,JSON.stringify(x||[]))}catch(e){}}
+function immediateIconKey(el){return Array.from(el.classList).find(c=>c.startsWith('immediate-')&&c.endsWith('-btn')&&c!=='immediate-icon-btn')||el.getAttribute('title')||''}
+function bindImmediateIconVisibility(){document.querySelectorAll('.immediate-detail-actions').forEach(box=>{const hidden=getImmediateHiddenIconKeys();let hiddenEls=[];box.querySelectorAll('.immediate-icon-btn').forEach(el=>{if(el.classList.contains('immediate-icon-curtain'))return;const key=immediateIconKey(el);if(hidden.includes(key)){el.classList.add('immediate-icon-hidden');hiddenEls.push(el)}let t,moved=false;el.addEventListener('pointerdown',()=>{moved=false;t=setTimeout(()=>openImmediateIconVisibilityPopup(key,false),650)});['pointerup','pointercancel','pointerleave'].forEach(e=>el.addEventListener(e,()=>clearTimeout(t),{once:false}))});if(hiddenEls.length&&!box.querySelector('.immediate-icon-curtain')){const b=document.createElement('button');b.type='button';b.className='immediate-icon-btn immediate-icon-curtain';b.title='Iconos ocultos';b.innerHTML='<i class="bi bi-chevron-bar-left"></i>';b.onclick=()=>openImmediateIconVisibilityPopup('',true);box.appendChild(b)}})}
+function getImmediateHiddenIconPresentation(key){
+ const selector='.immediate-detail-actions .'+CSS.escape(key);
+ const source=document.querySelector(selector);
+ if(source){
+  const icon=source.querySelector('i.bi');
+  if(icon)return{html:`<i class="${escapeHtml(icon.className)}"></i>`,title:source.getAttribute('title')||source.getAttribute('aria-label')||'Mostrar icono'};
+  const visual=source.querySelector('.immediate-broom-svg,.immediate-red-broom,svg');
+  if(visual)return{html:visual.outerHTML,title:source.getAttribute('title')||source.getAttribute('aria-label')||'Mostrar icono'};
+  const clean=source.cloneNode(true);clean.querySelectorAll('small,.immediate-copy-popup').forEach(x=>x.remove());return{html:clean.innerHTML,title:source.getAttribute('title')||source.getAttribute('aria-label')||'Mostrar icono'};
+ }
+ const fallback={
+  'immediate-view-reservations-btn':'bi-search','immediate-reserve-btn':'bi-bookmark','immediate-clean-request-btn':'bi-brush','immediate-maintenance-request-btn':'bi-hammer','immediate-reminder-btn':'bi-bell','immediate-mail-note-btn':'bi-envelope','immediate-lock-room-btn':'bi-key','immediate-free-week-btn':'bi-clock','immediate-weekly-schedule-btn':'bi-calendar-week','immediate-tech-report-btn':'bi-file-earmark-text','immediate-it-service-btn':'bi-headset','immediate-copy-user-btn':'bi-clipboard','immediate-report-class-btn':'bi-flag-fill','immediate-attention-pencil-btn':'bi-pencil-square','immediate-move-class-btn':'bi-arrow-left-right','immediate-next-clean-btn':'bi-brush','immediate-open-pending-btn':'bi-door-open','immediate-aforo-btn':'bi-people-fill','immediate-validate-btn':'bi-camera-video','immediate-quick-photo-btn':'bi-camera','immediate-lamp-hours-btn':'bi-projector','immediate-share-card-btn':'bi-share','immediate-general-info-btn':'bi-info-circle'
+ };
+ return{html:`<i class="bi ${fallback[key]||'bi-app-indicator'}"></i>`,title:'Mostrar icono'};
+}
+function openImmediateIconVisibilityPopup(key,showHidden){
+ if(showHidden){
+  const keys=getImmediateHiddenIconKeys();
+  const buttons=keys.map(k=>{const view=getImmediateHiddenIconPresentation(k);return `<button type="button" title="${escapeHtml(view.title)}" aria-label="${escapeHtml(view.title)}" onclick="showImmediateIconKey('${escapeHtml(k)}')">${view.html}</button>`}).join('');
+  openImmediateUtilityModal('Iconos ocultos',`<div class="immediate-longpress-menu">${buttons}</div>`,`<button class="immediate-utility-btn" onclick="closeImmediateUtilityModal()">Cerrar</button>`)
+ }else openImmediateUtilityModal('Ocultar icono',`<div class="immediate-longpress-menu"><button class="danger" title="Ocultar" onclick="hideImmediateIconKey('${escapeHtml(key)}')"><i class="bi bi-eye-slash"></i></button></div>`,`<button class="immediate-utility-btn" onclick="closeImmediateUtilityModal()">Cancelar</button>`)
+}
+function hideImmediateIconKey(key){const x=getImmediateHiddenIconKeys();if(key&&!x.includes(key))x.push(key);saveImmediateHiddenIconKeys(x);closeImmediateUtilityModal();bindImmediateIconVisibility();document.querySelectorAll('.immediate-detail-actions .'+CSS.escape(key)).forEach(e=>e.classList.add('immediate-icon-hidden'))}
+function showImmediateIconKey(key){saveImmediateHiddenIconKeys(getImmediateHiddenIconKeys().filter(k=>k!==key));closeImmediateUtilityModal();document.querySelectorAll('.immediate-detail-actions .'+CSS.escape(key)).forEach(e=>e.classList.remove('immediate-icon-hidden'));document.querySelectorAll('.immediate-icon-curtain').forEach(e=>e.remove());bindImmediateIconVisibility()}
+
 function showImmediateActionResults(actionKey, options = {}) {
   const __preserveScrollX=window.scrollX;const __preserveScrollY=window.scrollY;const __shouldPreserveScroll=!!(options&&options.preserveScroll);const __restoreScroll=()=>restoreImmediateScrollAnchor(__preserveScrollX,__preserveScrollY);
   if (!currentImmediateActionState) currentImmediateActionState = buildImmediateActionState();
@@ -4931,7 +5069,7 @@ function showImmediateActionResults(actionKey, options = {}) {
    const floorKey=group.floor===null||group.floor===undefined||Number.isNaN(group.floor)?'sin-piso':String(group.floor);const keyBtn=actionKey==='allRooms'?`<button class="immediate-floor-close-btn" title="Cerrar aulas del piso" onclick="openImmediateFloorCloseMenu('${escapeHtml(floorKey)}','${escapeHtml(group.label)}')"><i class="bi bi-key"></i></button>`:'';return `<div class="immediate-floor-block"><div class="immediate-floor-header"><div class="immediate-floor-title">${escapeHtml(group.label)}${keyBtn}</div><div class="immediate-floor-count"><i class="bi bi-grid"></i> ${group.items.length} resultado(s)</div></div><div class="immediate-card-grid">${cardsHtml}</div></div>`;
   }).join('');
   resultsWrap.classList.remove('hidden');
-  if(actionKey==='allRooms')container.insertAdjacentHTML('beforeend',buildImmediateAddCustomCardButton());setTimeout(()=>{if(immediateAllRoomsSearchValue)filterImmediateActionCards(immediateAllRoomsSearchValue);else updateImmediateActionSearchCounts()},0)
+  if(actionKey==='allRooms')container.insertAdjacentHTML('beforeend',buildImmediateAddCustomCardButton());setTimeout(()=>{if(immediateAllRoomsSearchValue)filterImmediateActionCards(immediateAllRoomsSearchValue);else updateImmediateActionSearchCounts();bindImmediateIconVisibility()},0)
   ensureImmediateFloatingButtons();
   if(__shouldPreserveScroll)__restoreScroll();else setTimeout(()=>{try{resultsWrap.scrollIntoView({behavior:'smooth',block:'start'})}catch(e){}},40);
 }
@@ -5030,18 +5168,13 @@ function generateImmediateActionsPdf() {
  }
         function showPavilions() {
             hideImmediateActionsPanel();
-            // Obtener lista de pabellones únicos y ordenarlos alfabéticamente
-            const pavilions = [...new Set(excelData.map(item => item['PABELLÓN']).filter(Boolean))].sort();
-            
-            // Mostrar todos los pabellones inicialmente
-            displayPavilions(pavilions);
-            
-            // Determinar pisos disponibles
+            const render=(campus)=>{const pavilions=[...new Set(rowsForCampus(campus).map(item=>item['PABELLÓN']).filter(Boolean))].sort();displayPavilions(pavilions);currentPavilion=null;document.getElementById('timeSlotSection').classList.add('hidden')};
+            const campus=populateCampusSelectById('pavilionCampusSelect',render);
+            render(campus);
             determineAvailableFloors();
-            
             document.getElementById('pavilionSection').classList.remove('hidden');
         }
-        
+
         // Determinar qué pisos están disponibles
         function determineAvailableFloors() {
             availableFloors.clear();
@@ -5135,7 +5268,7 @@ function generateImmediateActionsPdf() {
             // Obtener horas de inicio únicas para este pabellón
             const timeSlots = [...new Set(
                 excelData
-                    .filter(item => item['PABELLÓN'] === pavilion)
+                    .filter(item => item['PABELLÓN'] === pavilion && (!document.getElementById('pavilionCampusSelect')?.value || getGlobalCampusValue(item) === document.getElementById('pavilionCampusSelect').value))
                     .map(item => item['HORINI'])
                     .filter(Boolean)
             )].sort();
@@ -5192,7 +5325,9 @@ function generateImmediateActionsPdf() {
                 const sessionDateString = formatDate(sessionDate);
                 if (sessionDateString !== todayString) return false;
                 
-                // Filtrar por pabellón
+                // Filtrar por campus y pabellón
+                const pavilionCampus=document.getElementById('pavilionCampusSelect')?.value||'';
+                if (pavilionCampus && getGlobalCampusValue(item)!==pavilionCampus) return false;
                 if (item['PABELLÓN'] !== pavilion) return false;
                 
                 // Filtrar por hora seleccionada
@@ -5225,7 +5360,8 @@ function renderLatePavilions() {
   if (!container) return;
 
   container.innerHTML = '';
-  const pavilions = [...new Set(excelData.map(item => item['PABELLÓN']).filter(Boolean))].sort();
+  const campus=document.getElementById('lateCampusSelect')?.value||'';
+  const pavilions = [...new Set(rowsForCampus(campus).map(item => item['PABELLÓN']).filter(Boolean))].sort();
 
   // Botón "Todos"
   const allBtn = document.createElement('button');
@@ -5272,7 +5408,8 @@ function showLateClasses() {
   // Mostrar sección de cierre
   lateClassesSection.classList.remove('hidden');
 
-  // Renderizar pabellones (si no se selecciona ninguno, se mostrarán todos)
+  // Seleccionar campus recordado y renderizar sus pabellones
+  populateCampusSelectById('lateCampusSelect',()=>{currentLatePavilion='';renderLatePavilions();filterLateClasses()});
   renderLatePavilions();
 
   // Aplicar filtro actual
@@ -5303,7 +5440,9 @@ function showLateClasses() {
                 const sessionDateString = formatDate(sessionDate);
                 if (sessionDateString !== dateString) return false;
 
- // Filtrar por pabellón (opcional)
+ // Filtrar por campus y pabellón (opcionales)
+ const lateCampus=document.getElementById('lateCampusSelect')?.value||'';
+ if (lateCampus && getGlobalCampusValue(item)!==lateCampus) return false;
  if (currentLatePavilion && item['PABELLÓN'] !== currentLatePavilion) return false;
                 
                 // Verificar si la clase comienza o termina después de la hora límite
@@ -5412,11 +5551,32 @@ function showLateClasses() {
             const teacherQuery = normalizeString(document.getElementById('teacherGlobalSearch').value);
             const courseQuery = normalizeString(document.getElementById('courseGlobalSearch').value);
             const nrcQuery = document.getElementById('nrcSearch').value.trim(); // Búsqueda exacta para NRC
+            const softwareQuery = normalizeString(document.getElementById('softwareGlobalSearch')?.value || '');
+            const campusQuery = normalizeAcademicSoftwareKey(document.getElementById('globalCampusSelect')?.value || '');
+            if (softwareQuery && !academicSoftwareData.length) { alert('No se ha cargado ningún Listado de Software Académico.'); return; }
+
+            // La relación software-curso se calcula una sola vez por curso, departamento y periodo.
+            // Esto evita repetir la comparación difusa en cada sesión del mismo curso.
+            const softwareSearchCache = new Map();
+            function classUsesRequestedSoftware(item) {
+                if (!softwareQuery) return true;
+                const cacheKey = getAcademicClassAssignmentKey(item);
+                if (softwareSearchCache.has(cacheKey)) return softwareSearchCache.get(cacheKey);
+                const matches = getAcademicSoftwareForClass(item).some(sw => {
+                    const searchable = normalizeString(`${sw.NOM_SOFTWARE || ''} ${sw['VERSIÓN'] || ''}`);
+                    return searchable.includes(softwareQuery);
+                });
+                softwareSearchCache.set(cacheKey, matches);
+                return matches;
+            }
             
             // MODIFICACIÓN: Búsqueda case-insensitive para aula
             const classroomQuery = document.getElementById('classroomSearch').value.toLowerCase();
             
             const filteredData = excelData.filter(item => {
+                // Filtrar por campus. La opción vacía representa todos los campus.
+                if (campusQuery && normalizeAcademicSoftwareKey(getGlobalCampusValue(item)) !== campusQuery) return false;
+
                 // Filtrar por usuario si hay query - EXCLUIR "No especificado"
                 if (userQuery) {
                     if (!item['USUARIO PROFESOR'] || 
@@ -5451,6 +5611,9 @@ function showLateClasses() {
                     const aula = item['COD AULA'].toString().toLowerCase();
                     if (!aula.includes(classroomQuery)) return false;
                 }
+
+                // Filtrar por software asignado usando la caché optimizada.
+                if (!classUsesRequestedSoftware(item)) return false;
                 
                 return true;
             });
@@ -7159,41 +7322,16 @@ function generateAvailableSpacesPdf() {
 }
 
 function showAvailableSpacesPavilions() {
-            // Ocultar otras secciones
-            globalResultsSection.classList.add('hidden');
-            availableSpacesSection.classList.add('hidden');
-            classroomScheduleSection.classList.add('hidden');
-            
-            // Obtener lista de pabellones únicos y ordenarlos alfabéticamente
-            const pavilions = [...new Set(excelData.map(item => item['PABELLÓN']).filter(Boolean))].sort();
-            
-            const pavilionListGlobal = document.getElementById('pavilionListGlobal');
-            pavilionListGlobal.innerHTML = '';
-            
-            if (pavilions.length === 0) {
-                pavilionListGlobal.innerHTML = '<p>No se encontraron pabellones</p>';
-                return;
-            }
-            
-            pavilions.forEach(pavilion => {
-                const button = document.createElement('button');
-                button.className = 'btn btn-outline-primary pavilion-btn';
-                button.textContent = pavilion;
-                button.addEventListener('click', () => {
-                    currentPavilion = pavilion;
-                    calculateAvailableSpacesForPavilion(pavilion);
-                });
-                pavilionListGlobal.appendChild(button);
-            });
-            
-            pavilionSectionGlobal.classList.remove('hidden');
+            globalResultsSection.classList.add('hidden');availableSpacesSection.classList.add('hidden');classroomScheduleSection.classList.add('hidden');
+            const render=(campus)=>{const pavilions=[...new Set(rowsForCampus(campus).map(item=>item['PABELLÓN']).filter(Boolean))].sort();const list=document.getElementById('pavilionListGlobal');list.innerHTML='';if(!pavilions.length){list.innerHTML='<p>No se encontraron pabellones</p>';return}pavilions.forEach(pavilion=>{const button=document.createElement('button');button.className='btn btn-outline-primary pavilion-btn';button.textContent=pavilion;button.addEventListener('click',()=>{currentPavilion=pavilion;calculateAvailableSpacesForPavilion(pavilion)});list.appendChild(button)})};
+            const campus=populateCampusSelectById('availableCampusSelect',render);render(campus);pavilionSectionGlobal.classList.remove('hidden');
         }
-        
+
         function calculateAvailableSpacesForPavilion(pavilion) {
             // Obtener todas las fechas únicas en los datos
             const allDates = [...new Set(
                 excelData
-                    .filter(item => item['PABELLÓN'] === pavilion && item['FECHA SESION INI'])
+                    .filter(item => item['PABELLÓN'] === pavilion && (!document.getElementById('availableCampusSelect')?.value || getGlobalCampusValue(item) === document.getElementById('availableCampusSelect').value) && item['FECHA SESION INI'])
                     .map(item => {
                         let sessionDate;
                         if (typeof item['FECHA SESION INI'] === 'string') {
