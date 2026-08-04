@@ -4,7 +4,7 @@
 Proyecto : Dashboard UPC - el dash
 Autor    : Percy Salgado (UPC - Campus Monterrico)
 Licencia : MIT License
-Versión  : v.00118 (Agosto 2026)
+Versión  : v.00119 (Agosto 2026)
 ==============================================================================
 
 Descripción:
@@ -14,7 +14,7 @@ realizadas en Ambientes Académicos de la UPC
 Historial:
 - Idea y diseño conceptual iniciados entre el 2023 y el 2024.
 - Primeras versiones desarrolladas en fines de 2024.
-- Última versión estable: v.00118 (Agosto de 2026).
+- Última versión estable: v.00119 (Agosto de 2026).
 
 Propósito:
 Centralizar y optimizar la administración de horarios, recursos y actividades
@@ -1800,7 +1800,7 @@ window.DASHBOARD_FLOATING_VIDEO_URLS = {
     <!-- Footer -->
     <div class="footer">
         <div class="container">
-            <p class="mb-0">© 2026 Dashboard UPC <em>(El dash)</em> v.00118 - <a href="mailto:percy.salgado@upc.pe?subject=Sobre el dash">Feedback</a></p>
+            <p class="mb-0">© 2026 Dashboard UPC <em>(El dash)</em> v.00119 - <a href="mailto:percy.salgado@upc.pe?subject=Sobre el dash">Feedback</a></p>
         </div>
     </div>
 
@@ -3180,7 +3180,7 @@ const _printLateBtn = document.getElementById('printLateReportBtn');
           if(Array.isArray(value))return value.filter(v=>{const d=backupObjectDate(v,parentDate);return !d||(d>=from&&d<=to)}).map(v=>filterBackupRange(v,from,to,backupObjectDate(v,parentDate)));
           if(value&&typeof value==='object'){const own=backupObjectDate(value,parentDate),out={};for(const [k,v] of Object.entries(value)){const keyDate=backupDate(k),d=keyDate||backupObjectDate(v,own);if(d&&!(d>=from&&d<=to))continue;out[k]=filterBackupRange(v,from,to,d||own)}return out}return value
         }
-        function collectBackup(scope,user,range){const storage={};backupKeys(scope).forEach(k=>{const raw=localStorage.getItem(k);if(raw!==null){let v=backupParse(raw);if(range&&scope==='work')v=filterBackupRange(v,range.from,range.to);storage[k]=v}});return{format:DASHBOARD_BACKUP_FORMAT,version:2,dashboardVersion:'v.00118',scope,exportedAt:new Date().toISOString(),exportedBy:user,dateRange:range||null,storage}}
+        function collectBackup(scope,user,range){const storage={};backupKeys(scope).forEach(k=>{const raw=localStorage.getItem(k);if(raw!==null){let v=backupParse(raw);if(range&&scope==='work')v=filterBackupRange(v,range.from,range.to);storage[k]=v}});return{format:DASHBOARD_BACKUP_FORMAT,version:3,dashboardVersion:'v.00118',scope,exportedAt:new Date().toISOString(),exportedBy:user,dateRange:range||null,storage}}
         function downloadBackup(data){const safe=String(data.exportedBy||'usuario').replace(/[^A-Za-z0-9_-]+/g,'-'),stamp=new Date().toISOString().replace(/[:.]/g,'-'),filename=`Dashboard-UPC-${data.scope}-${safe}-${stamp}.psalgado`,payload=JSON.stringify(data,null,2),b=new Blob([payload],{type:'application/octet-stream'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=filename;a.setAttribute('download',filename);a.setAttribute('type','application/octet-stream');a.style.display='none';document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(u)},4000)}
         function openDashboardWorkRangeChoice(){openImmediateUtilityModal('Compartir avance',`<div class="immediate-utility-help">¿Desea compartir avances de varios días? Si elige No, se compartirán solamente los avances del día de hoy.</div><div class="backup-range-choice"><button onclick="openDashboardBackupExport('work','today')"><i class="bi bi-calendar-day"></i><br>No, solo hoy</button><button onclick="openDashboardBackupDateRange()"><i class="bi bi-calendar-range"></i><br>Sí, varios días</button></div>`,`<button class="immediate-utility-btn" onclick="openDashboardBackupsMenu()">Volver</button>`)}
         function openDashboardBackupDateRange(){const t=new Date().toISOString().slice(0,10);openImmediateUtilityModal('Periodo del avance',`<div class="immediate-utility-row"><div><label class="immediate-utility-label">Fecha inicial</label><input id="backupDateFrom" type="date" class="immediate-utility-input" value="${t}"></div><div><label class="immediate-utility-label">Fecha final</label><input id="backupDateTo" type="date" class="immediate-utility-input" value="${t}"></div></div>`,`<button class="immediate-utility-btn" onclick="openDashboardWorkRangeChoice()">Volver</button><button class="immediate-utility-btn primary" onclick="continueDashboardRangeExport()">Continuar</button>`)}
@@ -3192,10 +3192,71 @@ const _printLateBtn = document.getElementById('printLateReportBtn');
         function openDashboardBackupExport(scope,mode='',range=null){if(scope==='work'&&!mode){openDashboardWorkRangeChoice();return}if(scope==='work'&&mode==='today'){const t=new Date().toISOString().slice(0,10);range={from:t,to:t}}const label={all:'Backup completo',work:'Avance operativo',lamp:'Horas de lámparas',settings:'Configuración'}[scope]||scope,defaultUser=escapeHtml(getDashboardBackupDefaultUser());window.__dashboardBackupExport={scope,range};openImmediateUtilityModal('Exportar '+label,`<div class="immediate-utility-help">El usuario ingresado quedará como autor de los registros compartidos.</div><div><label class="immediate-utility-label">Usuario de referencia</label><input id="dashboardBackupUser" class="immediate-utility-input" value="${defaultUser}" placeholder="Ej.: psalgado" autocomplete="username"></div>${range?`<div class="immediate-utility-help"><strong>Periodo:</strong> ${range.from} al ${range.to}</div>`:''}`,`<button class="immediate-utility-btn" onclick="openDashboardBackupsMenu()">Volver</button><button class="immediate-utility-btn primary" onclick="confirmDashboardBackupExport()"><i class="bi bi-download"></i> Exportar</button>`)}
 
         function confirmDashboardBackupExport(){const u=(document.getElementById('dashboardBackupUser')?.value||'').trim(),x=window.__dashboardBackupExport;if(!u){alert('Ingrese un usuario de referencia.');return}downloadBackup(collectBackup(x.scope,u,x.range));closeImmediateUtilityModal()}
-        function backupAttr(v,u,e){if(Array.isArray(v))return v.map(x=>backupAttr(x,u,e));if(v&&typeof v==='object'){const o={};Object.entries(v).forEach(([k,x])=>o[k]=backupAttr(x,u,e));o.backupContributor||=u;o.backupExportedAt||=e;o.backupImportedAt||=new Date().toISOString();return o}return v}
+        function backupAttr(v,u,e){if(Array.isArray(v))return v.map(x=>backupAttr(x,u,e));if(v&&typeof v==='object'){const o={};Object.entries(v).forEach(([k,x])=>o[k]=backupAttr(x,u,e));const isRecord=['aula','dateKey','createdAt','updatedAt','status','line','nrc','ticket'].some(k=>Object.prototype.hasOwnProperty.call(o,k));if(isRecord){o.backupContributor||=u;o.backupExportedAt||=e;o.backupImportedAt||=new Date().toISOString()}return o}return v}
         function backupMerge(a,b,u,e){b=backupAttr(b,u,e);if(Array.isArray(a)&&Array.isArray(b)){const m=new Map(a.map(x=>[JSON.stringify(x),x]));b.forEach(x=>m.set(JSON.stringify(x),x));return[...m.values()]}if(a&&b&&typeof a==='object'&&typeof b==='object'&&!Array.isArray(a)&&!Array.isArray(b)){const o={...a};Object.entries(b).forEach(([k,v])=>o[k]=k in o?backupMerge(o[k],v,u,e):v);return o}return b}
         function openDashboardBackupImport(scope='any'){openImmediateUtilityModal('Importar backup',`<div class="immediate-utility-help">Seleccione un archivo de respaldo con extensión <strong>.psalgado</strong>.</div><div><label class="immediate-utility-label">Archivo</label><input id="dashboardBackupFile" type="file" accept=".psalgado" class="immediate-utility-input"></div><div><label class="immediate-utility-label">Método</label><select id="dashboardBackupMode" class="immediate-utility-select"><option value="merge">Combinar sin borrar avances locales</option><option value="replace">Reemplazar grupos incluidos</option></select></div>`,`<button class="immediate-utility-btn" onclick="openDashboardBackupsMenu()">Volver</button><button class="immediate-utility-btn primary" onclick="confirmDashboardBackupImport('${scope}')">Importar</button>`)}
-        async function confirmDashboardBackupImport(expected){const f=document.getElementById('dashboardBackupFile')?.files?.[0],mode=document.getElementById('dashboardBackupMode')?.value;if(!f){alert('Seleccione un archivo .psalgado.');return}if(!/\.psalgado$/i.test(f.name)){alert('Archivo no compatible. Solo se permiten archivos con extension .psalgado.');return}try{const d=JSON.parse(await f.text());if(d.format!==DASHBOARD_BACKUP_FORMAT||!d.storage)throw Error('Formato inválido');if(expected!=='any'&&d.scope!==expected&&d.scope!=='all')throw Error('Tipo de backup diferente');const u=d.exportedBy||'usuario externo';if(!confirm(`Información compartida por ${u}. ¿Continuar?`))return;Object.entries(d.storage).forEach(([k,v])=>{const raw=localStorage.getItem(k),local=raw===null?undefined:backupParse(raw),out=mode==='replace'||local===undefined?backupAttr(v,u,d.exportedAt):backupMerge(local,v,u,d.exportedAt);localStorage.setItem(k,typeof out==='string'?out:JSON.stringify(out))});let h=backupParse(localStorage.getItem(DASHBOARD_BACKUP_HISTORY_KEY)||'[]');if(!Array.isArray(h))h=[];h.push({sharedBy:u,scope:d.scope,importedAt:new Date().toISOString(),dateRange:d.dateRange||null});localStorage.setItem(DASHBOARD_BACKUP_HISTORY_KEY,JSON.stringify(h.slice(-50)));closeImmediateUtilityModal();alert(`Backup de ${u} importado correctamente.`);loadAcademicSoftwareStorage()}catch(e){alert('No se pudo importar: '+e.message)}}
+        function isDashboardQuotaError(error){return !!error&&(error.name==='QuotaExceededError'||error.name==='NS_ERROR_DOM_QUOTA_REACHED'||/quota|storage.*full|exceeded/i.test(String(error.message||error)))}
+        function dashboardUtf8Bytes(value){try{return new Blob([String(value??'')]).size}catch(e){return String(value??'').length*2}}
+        function dashboardImportSerializable(value){return typeof value==='string'?value:JSON.stringify(value)}
+        function dashboardBackupIsExcelHistoryKey(key){return key==='lastExcelData'||key==='lastExcelStorage'||key==='lastExcelMeta'}
+        async function migrateBackupExcelHistoryToIndexedDB(storage){
+          const raw=storage.lastExcelData;if(raw===undefined)return false;let rows=raw;
+          if(typeof rows==='string'){try{rows=JSON.parse(rows)}catch(e){rows=null}}
+          if(!Array.isArray(rows))return false;
+          const ok=await idbSetSafe('lastExcelMergedData',rows);if(!ok)return false;
+          try{localStorage.removeItem('lastExcelData');localStorage.setItem('lastExcelStorage','idb');if(storage.lastExcelMeta!==undefined)localStorage.setItem('lastExcelMeta',dashboardImportSerializable(storage.lastExcelMeta))}catch(e){}
+          return true;
+        }
+        function prepareDashboardBackupImport(storage,mode,user,exportedAt,skipKeys=new Set()){
+          const prepared=[];
+          Object.entries(storage).forEach(([key,incoming])=>{if(skipKeys.has(key))return;const raw=localStorage.getItem(key),local=raw===null?undefined:backupParse(raw);let out;if(mode==='replace'||local===undefined)out=backupAttr(incoming,user,exportedAt);else out=backupMerge(local,incoming,user,exportedAt);prepared.push({key,value:dashboardImportSerializable(out),oldValue:raw})});
+          return prepared;
+        }
+        function restoreDashboardBackupLocalStorage(snapshot){snapshot.forEach(x=>{try{if(x.oldValue===null)localStorage.removeItem(x.key);else localStorage.setItem(x.key,x.oldValue)}catch(e){console.warn('No se pudo restaurar',x.key,e)}})}
+        function freeDashboardSafeImportSpace(){['lastExcelData','dashboardBackupImportHistory'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}})}
+        async function writeDashboardBackupPrepared(prepared,mode){
+          if(mode==='replace')prepared.forEach(x=>{try{localStorage.removeItem(x.key)}catch(e){}});
+          const written=[];
+          try{for(const item of prepared){localStorage.setItem(item.key,item.value);written.push(item)}return{ok:true,written}}
+          catch(error){written.forEach(x=>{try{localStorage.removeItem(x.key)}catch(e){}});restoreDashboardBackupLocalStorage(prepared);return{ok:false,error}}
+        }
+        async function confirmDashboardBackupImport(expected){
+          const file=document.getElementById('dashboardBackupFile')?.files?.[0],mode=document.getElementById('dashboardBackupMode')?.value||'merge';
+          if(!file){alert('Seleccione un archivo .psalgado.');return}
+          if(!/\.psalgado$/i.test(file.name)){alert('Archivo no compatible. Solo se permiten archivos con extensión .psalgado.');return}
+          try{
+            const data=JSON.parse(await file.text());
+            if(!data||data.format!==DASHBOARD_BACKUP_FORMAT||!data.storage||typeof data.storage!=='object')throw Error('El archivo no tiene un formato de backup reconocido.');
+            if(expected!=='any'&&data.scope!==expected&&data.scope!=='all')throw Error(`Este archivo es de tipo ${data.scope||'desconocido'} y no corresponde a ${expected}.`);
+            const user=String(data.exportedBy||'usuario externo'),storage={...data.storage};
+            if(!confirm(`Información compartida por ${user}. Se validará el espacio antes de importar. ¿Continuar?`))return;
+            try{if(navigator.storage?.persist)await navigator.storage.persist()}catch(e){}
+            const migratedExcel=await migrateBackupExcelHistoryToIndexedDB(storage),skip=new Set();
+            if(migratedExcel){skip.add('lastExcelData');skip.add('lastExcelStorage');skip.add('lastExcelMeta')}
+            let prepared=prepareDashboardBackupImport(storage,mode,user,data.exportedAt,skip);
+            const required=prepared.reduce((n,x)=>n+dashboardUtf8Bytes(x.key)+dashboardUtf8Bytes(x.value),0);
+            let estimate=null;try{estimate=await navigator.storage?.estimate?.()}catch(e){}
+            if(estimate&&estimate.quota&&estimate.usage&&required>Math.max(0,estimate.quota-estimate.usage)&&mode!=='replace'){
+              if(!confirm(`El backup requiere aproximadamente ${(required/1048576).toFixed(1)} MB y el espacio libre estimado es ${((estimate.quota-estimate.usage)/1048576).toFixed(1)} MB. Se intentará optimizar el almacenamiento y continuar. ¿Desea proceder?`))return;
+            }
+            let result=await writeDashboardBackupPrepared(prepared,mode);
+            if(!result.ok&&isDashboardQuotaError(result.error)){
+              freeDashboardSafeImportSpace();
+              prepared=prepareDashboardBackupImport(storage,mode,user,data.exportedAt,skip);
+              result=await writeDashboardBackupPrepared(prepared,mode);
+            }
+            if(!result.ok){
+              if(isDashboardQuotaError(result.error))throw Error('El dispositivo no tiene espacio local suficiente. Se restauraron los datos anteriores. Exporte un backup, use Reset Factory en nivel Otros o importe con el método Reemplazar.');
+              throw result.error;
+            }
+            let history=backupParse(localStorage.getItem(DASHBOARD_BACKUP_HISTORY_KEY)||'[]');if(!Array.isArray(history))history=[];
+            history.push({sharedBy:user,scope:data.scope,importedAt:new Date().toISOString(),dateRange:data.dateRange||null,fileName:file.name,migratedExcelToIndexedDB:migratedExcel});
+            try{localStorage.setItem(DASHBOARD_BACKUP_HISTORY_KEY,JSON.stringify(history.slice(-30)))}catch(e){console.warn('No se pudo guardar el historial de importación',e)}
+            closeImmediateUtilityModal();loadAcademicSoftwareStorage();
+            alert(`Backup de ${user} importado correctamente.${migratedExcel?' La llave histórica se trasladó a IndexedDB para evitar límites de espacio.':''}`);
+          }catch(error){console.error('Error al importar backup:',error);alert('No se pudo importar: '+(error?.message||'error desconocido'))}
+        }
+
         function openDashboardBackupHistory(){let h=backupParse(localStorage.getItem(DASHBOARD_BACKUP_HISTORY_KEY)||'[]');const x=Array.isArray(h)&&h.length?h.slice().reverse().map(v=>`<div class="immediate-note-item"><strong>${escapeHtml(v.sharedBy||'Usuario')}</strong> · ${escapeHtml(v.scope||'')}<time>${escapeHtml(new Date(v.importedAt).toLocaleString('es-PE'))}</time></div>`).join(''):'<div class="immediate-note-item">Sin importaciones.</div>';openImmediateUtilityModal('Historial',`<div class="immediate-note-list">${x}</div>`,`<button class="immediate-utility-btn" onclick="openDashboardBackupsMenu()">Volver</button>`)}
         const DASHBOARD_FACTORY_CONFIG_KEYS=['dashboardGlobalCampusSelection','dashboardBackupDefaultUser','dashboardHiddenMainToolbarIcons','dashboardWikiquoteVisible','dashboardImmediateActionOrder','dashboardImmediateHiddenActionSections','dashboardImmediateHiddenCardIcons','dashboardImmediateFloatingButtonsPos','dashboardImmediateFloatingButtonsConfig','dashboardFloatingVideoHidden','dashboardFloatingVideoHiddenMap','dashboardAcademicSoftwareAssignments'];
         const DASHBOARD_FACTORY_RECORD_KEYS=['dashboardImmediateLampHours','dashboardImmediateMailNotes','dashboardImmediateMovedClasses','dashboardImmediateClosedAulas','dashboardImmediateDailyCleaningPending','dashboardImmediateDailyOpenPending','dashboardImmediateLastMinuteReservations'];
