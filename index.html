@@ -4,7 +4,7 @@
 Proyecto : Dashboard UPC - el dash
 Autor    : Percy Salgado (UPC - Campus Monterrico)
 Licencia : MIT License
-Versión  : v.00117 (Agosto 2026)
+Versión  : v.00118 (Agosto 2026)
 ==============================================================================
 
 Descripción:
@@ -14,7 +14,7 @@ realizadas en Ambientes Académicos de la UPC
 Historial:
 - Idea y diseño conceptual iniciados entre el 2023 y el 2024.
 - Primeras versiones desarrolladas en fines de 2024.
-- Última versión estable: v.00117 (Agosto de 2026).
+- Última versión estable: v.00118 (Agosto de 2026).
 
 Propósito:
 Centralizar y optimizar la administración de horarios, recursos y actividades
@@ -1800,7 +1800,7 @@ window.DASHBOARD_FLOATING_VIDEO_URLS = {
     <!-- Footer -->
     <div class="footer">
         <div class="container">
-            <p class="mb-0">© 2026 Dashboard UPC <em>(El dash)</em> v.00117 - <a href="mailto:percy.salgado@upc.pe?subject=Sobre el dash">Feedback</a></p>
+            <p class="mb-0">© 2026 Dashboard UPC <em>(El dash)</em> v.00118 - <a href="mailto:percy.salgado@upc.pe?subject=Sobre el dash">Feedback</a></p>
         </div>
     </div>
 
@@ -3180,8 +3180,8 @@ const _printLateBtn = document.getElementById('printLateReportBtn');
           if(Array.isArray(value))return value.filter(v=>{const d=backupObjectDate(v,parentDate);return !d||(d>=from&&d<=to)}).map(v=>filterBackupRange(v,from,to,backupObjectDate(v,parentDate)));
           if(value&&typeof value==='object'){const own=backupObjectDate(value,parentDate),out={};for(const [k,v] of Object.entries(value)){const keyDate=backupDate(k),d=keyDate||backupObjectDate(v,own);if(d&&!(d>=from&&d<=to))continue;out[k]=filterBackupRange(v,from,to,d||own)}return out}return value
         }
-        function collectBackup(scope,user,range){const storage={};backupKeys(scope).forEach(k=>{const raw=localStorage.getItem(k);if(raw!==null){let v=backupParse(raw);if(range&&scope==='work')v=filterBackupRange(v,range.from,range.to);storage[k]=v}});return{format:DASHBOARD_BACKUP_FORMAT,version:2,dashboardVersion:'v.00117',scope,exportedAt:new Date().toISOString(),exportedBy:user,dateRange:range||null,storage}}
-        function downloadBackup(data){const safe=String(data.exportedBy||'usuario').replace(/[^A-Za-z0-9_-]+/g,'-'),stamp=new Date().toISOString().replace(/[:.]/g,'-'),b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=`Dashboard-UPC-${data.scope}-${safe}-${stamp}.psalgado`;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+        function collectBackup(scope,user,range){const storage={};backupKeys(scope).forEach(k=>{const raw=localStorage.getItem(k);if(raw!==null){let v=backupParse(raw);if(range&&scope==='work')v=filterBackupRange(v,range.from,range.to);storage[k]=v}});return{format:DASHBOARD_BACKUP_FORMAT,version:2,dashboardVersion:'v.00118',scope,exportedAt:new Date().toISOString(),exportedBy:user,dateRange:range||null,storage}}
+        function downloadBackup(data){const safe=String(data.exportedBy||'usuario').replace(/[^A-Za-z0-9_-]+/g,'-'),stamp=new Date().toISOString().replace(/[:.]/g,'-'),filename=`Dashboard-UPC-${data.scope}-${safe}-${stamp}.psalgado`,payload=JSON.stringify(data,null,2),b=new Blob([payload],{type:'application/octet-stream'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=filename;a.setAttribute('download',filename);a.setAttribute('type','application/octet-stream');a.style.display='none';document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(u)},4000)}
         function openDashboardWorkRangeChoice(){openImmediateUtilityModal('Compartir avance',`<div class="immediate-utility-help">¿Desea compartir avances de varios días? Si elige No, se compartirán solamente los avances del día de hoy.</div><div class="backup-range-choice"><button onclick="openDashboardBackupExport('work','today')"><i class="bi bi-calendar-day"></i><br>No, solo hoy</button><button onclick="openDashboardBackupDateRange()"><i class="bi bi-calendar-range"></i><br>Sí, varios días</button></div>`,`<button class="immediate-utility-btn" onclick="openDashboardBackupsMenu()">Volver</button>`)}
         function openDashboardBackupDateRange(){const t=new Date().toISOString().slice(0,10);openImmediateUtilityModal('Periodo del avance',`<div class="immediate-utility-row"><div><label class="immediate-utility-label">Fecha inicial</label><input id="backupDateFrom" type="date" class="immediate-utility-input" value="${t}"></div><div><label class="immediate-utility-label">Fecha final</label><input id="backupDateTo" type="date" class="immediate-utility-input" value="${t}"></div></div>`,`<button class="immediate-utility-btn" onclick="openDashboardWorkRangeChoice()">Volver</button><button class="immediate-utility-btn primary" onclick="continueDashboardRangeExport()">Continuar</button>`)}
         function continueDashboardRangeExport(){const f=document.getElementById('backupDateFrom')?.value,t=document.getElementById('backupDateTo')?.value;if(!f||!t||f>t){alert('Seleccione un rango de fechas válido.');return}openDashboardBackupExport('work','range',{from:f,to:t})}
