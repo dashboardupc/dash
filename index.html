@@ -4,7 +4,7 @@
 Proyecto : Dashboard UPC - el dash
 Autor    : Percy Salgado (UPC - Campus Monterrico)
 Licencia : MIT License
-Versión  : v.00135 (Agosto 2026)
+Versión  : v.00136 (Agosto 2026)
 ==============================================================================
 
 Descripción:
@@ -14,7 +14,7 @@ realizadas en Ambientes Académicos de la UPC
 Historial:
 - Idea y diseño conceptual iniciados entre el 2023 y el 2024.
 - Primeras versiones desarrolladas en fines de 2024.
-- Última versión estable: v.00135 (Agosto de 2026).
+- Última versión estable: v.00136 (Agosto de 2026).
 
 Propósito:
 Centralizar y optimizar la administración de horarios, recursos y actividades
@@ -1800,7 +1800,7 @@ window.DASHBOARD_FLOATING_VIDEO_URLS = {
     <!-- Footer -->
     <div class="footer">
         <div class="container">
-            <p class="mb-0">© 2026 Dashboard UPC <em>(El dash)</em> v.00135 - <a href="mailto:percy.salgado@upc.pe?subject=Sobre el dash">Feedback</a></p>
+            <p class="mb-0">© 2026 Dashboard UPC <em>(El dash)</em> v.00136 - <a href="mailto:percy.salgado@upc.pe?subject=Sobre el dash">Feedback</a></p>
         </div>
     </div>
 
@@ -3203,7 +3203,7 @@ const _printLateBtn = document.getElementById('printLateReportBtn');
           if(Array.isArray(value))return value.filter(v=>{const d=backupObjectDate(v,parentDate);return !d||(d>=from&&d<=to)}).map(v=>filterBackupRange(v,from,to,backupObjectDate(v,parentDate)));
           if(value&&typeof value==='object'){const own=backupObjectDate(value,parentDate),out={};for(const [k,v] of Object.entries(value)){const keyDate=backupDate(k),d=keyDate||backupObjectDate(v,own);if(d&&!(d>=from&&d<=to))continue;out[k]=filterBackupRange(v,from,to,d||own)}return out}return value
         }
-        function collectBackup(scope,user,range){const storage={};const keys=new Set(backupKeys(scope));if(typeof dashboardBackupMemory!=='undefined')dashboardBackupMemory.forEach((v,k)=>{if(scope==='all'||scope==='work'&&DASHBOARD_BACKUP_OPERATIONAL_KEYS.includes(k)||scope==='lamp'&&k==='dashboardImmediateLampHours'||scope==='settings'&&k.startsWith('dashboard')&&!DASHBOARD_BACKUP_OPERATIONAL_KEYS.includes(k))keys.add(k)});keys.forEach(k=>{const cached=typeof dashboardBackupMemory!=='undefined'?dashboardBackupMemory.get(k):undefined,raw=localStorage.getItem(k);if(cached!==undefined||raw!==null){let v=cached!==undefined?dashboardBackupClone(cached):backupParse(raw);if(range&&scope==='work')v=filterBackupRange(v,range.from,range.to);storage[k]=v}});return{format:DASHBOARD_BACKUP_FORMAT,version:2,dashboardVersion:'v.00135',scope,exportedAt:new Date().toISOString(),exportedBy:user,dateRange:range||null,storage}}
+        function collectBackup(scope,user,range){const storage={};const keys=new Set(backupKeys(scope));if(typeof dashboardBackupMemory!=='undefined')dashboardBackupMemory.forEach((v,k)=>{if(scope==='all'||scope==='work'&&DASHBOARD_BACKUP_OPERATIONAL_KEYS.includes(k)||scope==='lamp'&&k==='dashboardImmediateLampHours'||scope==='settings'&&k.startsWith('dashboard')&&!DASHBOARD_BACKUP_OPERATIONAL_KEYS.includes(k))keys.add(k)});keys.forEach(k=>{const cached=typeof dashboardBackupMemory!=='undefined'?dashboardBackupMemory.get(k):undefined,raw=localStorage.getItem(k);if(cached!==undefined||raw!==null){let v=cached!==undefined?dashboardBackupClone(cached):backupParse(raw);if(range&&scope==='work')v=filterBackupRange(v,range.from,range.to);storage[k]=v}});return{format:DASHBOARD_BACKUP_FORMAT,version:2,dashboardVersion:'v.00136',scope,exportedAt:new Date().toISOString(),exportedBy:user,dateRange:range||null,storage}}
         function downloadBackup(data){const safe=String(data.exportedBy||'usuario').replace(/[^A-Za-z0-9_-]+/g,'-'),stamp=new Date().toISOString().replace(/[:.]/g,'-'),filename=`Dashboard-UPC-${data.scope}-${safe}-${stamp}.drmac`,payload=JSON.stringify(data,null,2),b=new Blob([payload],{type:'application/octet-stream'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=filename;a.setAttribute('download',filename);a.setAttribute('type','application/octet-stream');a.style.display='none';document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(u)},4000)}
         function openDashboardWorkRangeChoice(){openImmediateUtilityModal('Compartir avance',`<div class="immediate-utility-help">¿Desea compartir avances de varios días? Si elige No, se compartirán solamente los avances del día de hoy.</div><div class="backup-range-choice"><button onclick="openDashboardBackupExport('work','today')"><i class="bi bi-calendar-day"></i><br>No, solo hoy</button><button onclick="openDashboardBackupDateRange()"><i class="bi bi-calendar-range"></i><br>Sí, varios días</button></div>`,`<button class="immediate-utility-btn" onclick="openDashboardBackupsMenu()">Volver</button>`)}
         function openDashboardBackupDateRange(){const t=new Date().toISOString().slice(0,10);openImmediateUtilityModal('Periodo del avance',`<div class="immediate-utility-row"><div><label class="immediate-utility-label">Fecha inicial</label><input id="backupDateFrom" type="date" class="immediate-utility-input" value="${t}"></div><div><label class="immediate-utility-label">Fecha final</label><input id="backupDateTo" type="date" class="immediate-utility-input" value="${t}"></div></div>`,`<button class="immediate-utility-btn" onclick="openDashboardWorkRangeChoice()">Volver</button><button class="immediate-utility-btn primary" onclick="continueDashboardRangeExport()">Continuar</button>`)}
@@ -5144,7 +5144,8 @@ function showImmediateIconKey(key){saveImmediateHiddenIconKeys(getImmediateHidde
 
 function showImmediateActionResults(actionKey, options = {}) {
   const __preserveScrollX=window.scrollX;const __preserveScrollY=window.scrollY;const __shouldPreserveScroll=!!(options&&options.preserveScroll);const __restoreScroll=()=>restoreImmediateScrollAnchor(__preserveScrollX,__preserveScrollY);
-  if (!(options && options.reuseState && currentImmediateActionState)) currentImmediateActionState = buildImmediateActionState();
+  const __drmacMobile = window.matchMedia && window.matchMedia('(max-width: 820px)').matches;
+  if (!(__drmacMobile && currentImmediateActionState && currentImmediateActionState.actionData)) currentImmediateActionState = buildImmediateActionState();
   const def = getImmediateActionDefinition(actionKey);
   if (!def) return;
   currentImmediateActionKey = actionKey;
@@ -5154,15 +5155,12 @@ function showImmediateActionResults(actionKey, options = {}) {
   const summaryEl = document.getElementById('immediateActionTimeSummary');
   const container = document.getElementById('immediateActionResultsContainer');
   if (!resultsWrap || !titleEl || !descEl || !summaryEl || !container) return;const shareAllRoomsBtn=document.getElementById('shareAllRoomsReportsBtn');if(shareAllRoomsBtn){const showShare=(actionKey==='allRooms'||actionKey==='availableSpacesNowWithNextHourClasses'||isImmediateReadyShareAction(actionKey));shareAllRoomsBtn.classList.toggle('hidden',!showShare);shareAllRoomsBtn.setAttribute('onclick','openImmediateActionSharePopup()');}configureAllRoomsSearchControls(actionKey);
-  const allItems = currentImmediateActionState.actionData[actionKey] || [];
-  const __mobileMode = window.matchMedia && window.matchMedia('(max-width: 820px)').matches;
-  const __mobileLimit = __mobileMode ? getDrmacMobileRenderLimit(actionKey) : allItems.length;
-  const items = __mobileMode ? allItems.slice(0, __mobileLimit) : allItems;
+  const items = currentImmediateActionState.actionData[actionKey] || [];
   const ctx = currentImmediateActionState.context;
   titleEl.textContent = def.label;
   descEl.textContent = def.description;
-  summaryEl.innerHTML = (actionKey === 'allClasses' ? buildImmediateAllClassesDateSelector(ctx) : '') + buildImmediateActionSummary(def, ctx, allItems.length);
-  if (!allItems.length) {
+  summaryEl.innerHTML = (actionKey === 'allClasses' ? buildImmediateAllClassesDateSelector(ctx) : '') + buildImmediateActionSummary(def, ctx, items.length);
+  if (!items.length) {
    container.innerHTML = `<div class="immediate-empty-state"><i class="bi bi-info-circle"></i> No se encontraron resultados para este apartado en <strong>${escapeHtml(formatDateForDisplay(ctx.selectedDate))}</strong> para el pabellón <strong>${escapeHtml(currentImmediatePavilion)}</strong>.</div>`;
    resultsWrap.classList.remove('hidden');
    ensureImmediateFloatingButtons();
@@ -5179,7 +5177,6 @@ function showImmediateActionResults(actionKey, options = {}) {
    const floorKey=group.floor===null||group.floor===undefined||Number.isNaN(group.floor)?'sin-piso':String(group.floor);const keyBtn=actionKey==='allRooms'?`<button class="immediate-floor-close-btn" title="Cerrar aulas del piso" onclick="openImmediateFloorCloseMenu('${escapeHtml(floorKey)}','${escapeHtml(group.label)}')"><i class="bi bi-key"></i></button>`:'';return `<div class="immediate-floor-block"><div class="immediate-floor-header"><div class="immediate-floor-title">${escapeHtml(group.label)}${keyBtn}</div><div class="immediate-floor-count"><i class="bi bi-grid"></i> ${group.items.length} resultado(s)</div></div><div class="immediate-card-grid">${cardsHtml}</div></div>`;
   }).join('');
   resultsWrap.classList.remove('hidden');
-  if(__mobileMode && items.length < allItems.length) container.insertAdjacentHTML('beforeend', buildDrmacMobileLoadMore(actionKey, items.length, allItems.length));
   if(actionKey==='allRooms')container.insertAdjacentHTML('beforeend',buildImmediateAddCustomCardButton());setTimeout(()=>{if(immediateAllRoomsSearchValue)filterImmediateActionCards(immediateAllRoomsSearchValue);else updateImmediateActionSearchCounts();bindImmediateIconVisibility()},0)
   ensureImmediateFloatingButtons();
   if(__shouldPreserveScroll)__restoreScroll();else setTimeout(()=>{try{resultsWrap.scrollIntoView({behavior:'smooth',block:'start'})}catch(e){}},40);
@@ -8113,98 +8110,69 @@ function drmacChecklistReport(){
 </script>
 
 <style>
-/* v.00134: optimizaciones de renderizado para dispositivos móviles. */
-@media (max-width: 820px){
-  .immediate-floor-block,.immediate-card-collapsible,.immediate-action-tile{content-visibility:auto;contain-intrinsic-size:auto 180px}
-  .immediate-card-grid{align-items:start}
-  .immediate-card-collapsible{contain:layout style paint}
-  html{scroll-behavior:auto!important}
-  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+/* v.00136: optimización compatible para móvil, sin paginación ni contención agresiva. */
+@media(max-width:820px){
+ html{scroll-behavior:auto!important}
+ .immediate-card-grid{grid-template-columns:minmax(0,1fr)!important}
+ .immediate-card-collapsible:not([open])>.immediate-card-shell>.immediate-card-body{display:none!important}
+ .immediate-card-collapsible{box-shadow:none}
 }
 </style>
 <script>
-/* v.00134: evita trabajo invisible y lecturas repetidas durante la carga de apartados. */
+/* v.00136: índices en memoria para evitar recorrer toda la programación por cada aula. */
 (function(){
- const mobile=()=>window.matchMedia&&window.matchMedia('(max-width: 820px)').matches;
- /* Los videos están ocultos por defecto: se evita crearlos para luego eliminarlos. */
- window.showDashboardFloatingVideos=function(){
-   try{closeDashboardFloatingVideos()}catch(e){}
-   return null;
- };
- window.createDashboardFloatingVideo=function(){return null};
- try{closeDashboardFloatingVideos()}catch(e){}
- document.querySelectorAll('.dashboard-floating-video-wrap').forEach(el=>el.remove());
-
- /* Caché breve para checklist. Antes se analizaba localStorage una vez por cada tarjeta. */
- let checklistDefsCache=null,checklistMarksCache=null,cacheTime=0;
- function refreshChecklistCache(force=false){
-   const now=Date.now();
-   if(force||!checklistDefsCache||now-cacheTime>750){
-     checklistDefsCache=storageArr(DRMAC_CHECKLISTS_KEY);
-     checklistMarksCache=storageObj(DRMAC_CHECKLIST_MARKS_KEY);
-     cacheTime=now;
-   }
+ let softwareIndex=null,softwareSignature='';
+ let checklistDefinitions=null,checklistMarks=null,checklistSignature='';
+ function currentSignature(){
+   return `${currentImmediatePavilion||''}|${currentImmediateActionKey||''}|${todayClassesDate instanceof Date?formatDate(todayClassesDate):''}`;
  }
- window.drmacInvalidateChecklistRenderCache=function(){checklistDefsCache=null;checklistMarksCache=null;cacheTime=0};
+ function buildSoftwareIndex(){
+   const signature=currentSignature();
+   if(softwareIndex&&softwareSignature===signature)return softwareIndex;
+   const index=new Map();
+   const aulas=typeof getImmediateKnownAulas==='function'?getImmediateKnownAulas():[];
+   aulas.forEach(aula=>{
+     const unique=new Map();
+     const rows=getDashboardRowsByAula(aula)||[];
+     rows.forEach(item=>(getAcademicSoftwareForClass(item)||[]).forEach(sw=>{
+       const name=String(sw.NOM_SOFTWARE||'').trim();if(!name)return;
+       const key=normalizeAcademicSoftwareKey(name);
+       if(!unique.has(key))unique.set(key,{name,count:1});
+     }));
+     index.set(String(aula),[...unique.values()].sort((a,b)=>a.name.localeCompare(b.name,'es',{sensitivity:'base'})));
+   });
+   softwareIndex=index;softwareSignature=signature;return index;
+ }
+ window.drmacRoomSoftware=function(entry){return buildSoftwareIndex().get(String(entry?.aula||''))||[]};
+ function prepareChecklistCache(){
+   const signature=currentSignature();
+   if(checklistDefinitions&&checklistMarks&&checklistSignature===signature)return;
+   checklistDefinitions=storageArr(DRMAC_CHECKLISTS_KEY);
+   checklistMarks=storageObj(DRMAC_CHECKLIST_MARKS_KEY);
+   checklistSignature=signature;
+ }
  window.buildDrmacChecklists=function(entry){
-   refreshChecklistCache();
-   const defs=checklistDefsCache.filter(c=>drmacChecklistApplies(c,entry));
-   return defs.map(c=>{
-     const key=drmacChecklistMarkKey(c,entry),marked=!!checklistMarksCache[key],color=c.color||'#6a2948';
+   prepareChecklistCache();
+   return checklistDefinitions.filter(c=>drmacChecklistApplies(c,entry)).map(c=>{
+     const marked=!!checklistMarks[drmacChecklistMarkKey(c,entry)],color=c.color||'#6a2948';
      return `<div class="immediate-line"><i class="bi bi-list-check" style="color:${escapeHtml(color)}"></i><div style="width:100%"><label class="drmac-count-check" style="--drmac-check-color:${escapeHtml(color)}"><input type="checkbox" ${marked?'checked':''} onchange="toggleDrmacCountChecklist(this,'${c.id}')"><strong>${escapeHtml(c.name)}</strong></label></div></div>`;
    }).join('');
  };
- const originalToggle=window.toggleDrmacCountChecklist;
- if(typeof originalToggle==='function')window.toggleDrmacCountChecklist=function(){drmacInvalidateChecklistRenderCache();return originalToggle.apply(this,arguments)};
- const originalSave=window.saveDrmacChecklist;
- if(typeof originalSave==='function')window.saveDrmacChecklist=function(){drmacInvalidateChecklistRenderCache();return originalSave.apply(this,arguments)};
-
- /* En móvil se anulan desplazamientos animados que compiten con el render de muchas tarjetas. */
- if(mobile()){
-   window.immediateScrollToElementStable=function(el,block='start'){
-     if(!el)return;
-     requestAnimationFrame(()=>{try{el.scrollIntoView({behavior:'auto',block,inline:'nearest'})}catch(e){}});
-   };
-   window.immediateSmoothScrollToElement=function(el,block='start'){
-     if(!el)return;
-     requestAnimationFrame(()=>{try{el.scrollIntoView({behavior:'auto',block,inline:'nearest'})}catch(e){}});
-   };
+ function invalidate(){softwareIndex=null;softwareSignature='';checklistDefinitions=null;checklistMarks=null;checklistSignature=''}
+ const oldToggle=window.toggleDrmacCountChecklist;
+ if(typeof oldToggle==='function')window.toggleDrmacCountChecklist=function(){invalidate();return oldToggle.apply(this,arguments)};
+ const oldSave=window.saveDrmacChecklist;
+ if(typeof oldSave==='function')window.saveDrmacChecklist=function(){invalidate();return oldSave.apply(this,arguments)};
+ /* Videos ocultos: no crear nodos multimedia en segundo plano. */
+ window.showDashboardFloatingVideos=function(){try{closeDashboardFloatingVideos()}catch(e){}return null};
+ window.createDashboardFloatingVideo=function(){return null};
+ try{closeDashboardFloatingVideos()}catch(e){}
+ /* Evita desplazamiento animado costoso solo en móvil. */
+ if(window.matchMedia&&window.matchMedia('(max-width:820px)').matches){
+   window.immediateScrollToElementStable=function(el,block='start'){if(el)requestAnimationFrame(()=>{try{el.scrollIntoView({behavior:'auto',block,inline:'nearest'})}catch(e){}})};
+   window.immediateSmoothScrollToElement=window.immediateScrollToElementStable;
  }
-
- /* Agrupa las comprobaciones posteriores a clic para no ejecutarlas varias veces por cuadro. */
- let pending=false;
- document.addEventListener('click',()=>{
-   if(pending)return;pending=true;
-   requestAnimationFrame(()=>{pending=false;if(typeof drmacInvalidateChecklistRenderCache==='function')drmacInvalidateChecklistRenderCache()});
- },{passive:true,capture:true});
 })();
-</script>
-
-<style>
-.drmac-mobile-more-wrap{display:flex;justify-content:center;padding:14px 8px 90px}.drmac-mobile-more-btn{min-width:220px;border:0;border-radius:14px;background:#21417f;color:#fff;font-weight:800;padding:13px 18px;box-shadow:0 8px 18px rgba(33,65,127,.22)}.drmac-mobile-more-btn small{display:block;font-weight:500;opacity:.85;margin-top:3px}
-@media(min-width:821px){.drmac-mobile-more-wrap{display:none!important}}
-@media(max-width:820px){.immediate-card-collapsible:not([open]) .immediate-card-body{display:none!important}.immediate-card-grid{grid-template-columns:minmax(0,1fr)!important}.immediate-floor-block{contain:layout style}.immediate-detail-actions{flex-wrap:wrap}}
-</style>
-<script>
-/* v.00135: paginación real en móvil. Solo se construyen 10 tarjetas inicialmente. */
-const DRMAC_MOBILE_BATCH_SIZE=10;
-const drmacMobileRenderLimits={};
-function getDrmacMobileRenderLimit(actionKey){return Math.max(DRMAC_MOBILE_BATCH_SIZE,Number(drmacMobileRenderLimits[actionKey])||DRMAC_MOBILE_BATCH_SIZE)}
-function buildDrmacMobileLoadMore(actionKey,shown,total){return `<div class="drmac-mobile-more-wrap"><button type="button" class="drmac-mobile-more-btn" onclick="loadMoreDrmacMobileCards('${escapeHtml(actionKey)}')">Mostrar ${Math.min(DRMAC_MOBILE_BATCH_SIZE,total-shown)} tarjetas más<small>${shown} de ${total} cargadas</small></button></div>`}
-function loadMoreDrmacMobileCards(actionKey){
- const x=window.scrollX,y=window.scrollY;
- drmacMobileRenderLimits[actionKey]=getDrmacMobileRenderLimit(actionKey)+DRMAC_MOBILE_BATCH_SIZE;
- showImmediateActionResults(actionKey,{preserveScroll:true,reuseState:true});
- requestAnimationFrame(()=>window.scrollTo(x,y));
-}
-/* Al abrir otro apartado se reinicia su lote, evitando crecimiento permanente del DOM. */
-document.addEventListener('click',e=>{
- const tile=e.target.closest('.immediate-action-tile');
- if(!tile)return;
- const onclick=tile.getAttribute('onclick')||'';
- const m=onclick.match(/openImmediateActionByKey\(['\"]([^'\"]+)/);
- if(m)drmacMobileRenderLimits[m[1]]=DRMAC_MOBILE_BATCH_SIZE;
-},{capture:true,passive:true});
 </script>
 </body>
 </html>
