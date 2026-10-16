@@ -8813,7 +8813,7 @@ async function stampVideoRealtime(file,entry,quality='hd'){if(!file||!window.Med
     const entry=immediateUtilityModalState.entry;
     if(!entry)return;
     immediateUtilityModalState.cleaningTextSaved=false;
-    const reasons=['Ambiente requiere limpieza','Goteo de aire acondicionado','Lavado de pisos','Lavado de sillas','Limpieza de ventiladores','Líquido derramado','Retiro de deshechos (Opc. Se requieren bolsas)','Otros'];
+    const reasons=['*Ambiente requiere limpieza*','*Goteo de aire acondicionado*','*Lavado de pisos*','*Lavado de sillas*','*Limpieza de ventiladores*','*Líquido derramado*','*Retiro de deshechos* (Opc. Se requieren bolsas)','Otros'];
     const fixedMoments=['Ahora','*Atentos* al cambio de clases','*URGENTE,* clase en espera','*URGENTE,* clase empieza en breve'];
     const weekSlots=getImmediateWeeklyFreeSlots(entry,40);
     const slotOptions=weekSlots.map(slot=>{
